@@ -1,0 +1,378 @@
+{
+  "run_id": "run_005",
+  "timestamp": "2026-02-19T02:28:38.369633",
+  "fixes_applied": [
+    "Single synthesis call with full untruncated specialist JSON",
+    "max_tokens=8000 (up from 5000)",
+    "3 retries with +2000 tokens each before Claude fallback",
+    "Synthesis rule: DO NOT invent values \u2014 say 'unspecified' if not in inputs",
+    "6 specialists including dedicated Recovery Specialist"
+  ],
+  "phase_coverage": {
+    "single": 5,
+    "multi": 5
+  },
+  "specificity_markers": {
+    "single": 5,
+    "multi": 10
+  },
+  "single_agent": {
+    "output": "## Phase 1: Detect\n\n### Mechanism 1: Liveness Heartbeat Monitoring\n*   **Named Protocol**: `AgentLivenessHeartbeat` (ALH)\n*   **Specific Timing**: 500ms interval (broadcast) / 1500ms timeout (detection)\n*   **Named Algorithm**: `PhiAccrualFailureDetector`\n*   **Message Schema (JSON fields)**:\n    ```json\n    {\n      \"agent_id\": \"UUID\",\n      \"timestamp_ms\": \"long\",\n      \"sequence_number\": \"int\",\n      \"load_metric\": \"float\",\n      \"status\": \"string\"\n    }\n    ```\n*   **Failure Modes**: Network partition causing false positives (split-brain); clock drift between agents causing interpretation errors.\n\n### Mechanism 2: Semantic Output Drift Analysis\n*   **Named Protocol**: `SemanticConsensusCheck` (SCC)\n*   **Specific Timing**: 250ms post-inference generation\n*   **Named Algorithm**: `RobustRandomCutForest` (for anomaly detection on embeddings)\n*   **Message Schema (JSON fields)**:\n    ```json\n    {\n      \"task_id\": \"UUID\",\n      \"output_embedding\": \"float[]\",\n      \"confidence_score\": \"float\",\n      \"agent_id\": \"UUID\",\n      \"schema_version\": \"int\"\n    }\n    ```\n*   **Failure Modes**: Concept drift leading to flagging of correct, novel answers as errors; embedding dimension mismatch crashing the detector.\n\n## Phase 2: Alert & Communication\n\n### Mechanism 1: Orchestrator Signal Broadcast\n*   **Named Protocol**: `CrisisBroadcastSignal` (CBS)\n*   **Specific Timing**: 10ms from detection\u786e\u8ba4 to transmission\n*   **Named Algorithm**: `BinarySpreadingGossip`\n*   **Message Schema (JSON fields)**:\n    ```json\n    {\n      \"incident_id\": \"UUID\",\n      \"alert_level\": \"enum\",\n      \"affected_agent_id\": \"UUID\",\n      \"initiated_by\": \"UUID\",\n      \"epoch_time\": \"long\",\n      \"signature\": \"string\"\n    }\n    ```\n*   **Failure Modes**: Message buffer saturation in high-throughput scenarios; inability to revoke a false positive alert once propagated.\n\n### Mechanism 2: Quorum Acknowledgement Synchronization\n*   **Named Protocol**: `SyncAckBarrier` (SAB)\n*   **Specific Timing**: 200ms total timeout for all acknowledgments\n*   **Named Algorithm**: `Paxos-basedConsensus`\n*   **Message Schema (JSON fields)**:\n    ```json\n    {\n      \"proposal_id\": \"UUID\",\n      \"agent_vote\": \"boolean\",\n      \"proposed_state\": \"string\",\n      \"voter_id\": \"UUID\",\n      \"lock_token\": \"string\"\n    }\n    ```\n*   **Failure Modes**: Deadlock if a non-faulty agent hangs; partial quorum reached causing system state divergence.\n\n## Phase 3: Redistribute Work\n\n### Mechanism 1: Dynamic State Migration\n*   **Named Protocol**: `CheckpointResumeProtocol` (CRP)\n*   **Specific Timing**: 1500ms data transfer + 500ms setup\n*   **Named Algorithm**: `MinimalKafkaPartitioning`\n*   **Message Schema (JSON fields)**:\n    ```json\n    {\n      \"migration_id\": \"UUID\",\n      \"source_agent\": \"UUID\",\n      \"target_agent\": \"UUID\",\n      \"chunk_offset\": \"long\",\n      \"serialized_state\": \"bytes\",\n      \"priority_weight\": \"int\"\n    }\n    ```\n*   **Failure Modes**: State object corruption during serialization; memory overflow on the target agent due to sudden load.\n\n### Mechanism 2: Workload Stealing & Rebalancing\n*   **Named Protocol**: `WorkStealingHandshake` (WSH)\n*   **Specific Timing**: 100ms negotiation per task shard\n*   **Named Algorithm**: `LeastLatencyFirstSearch`\n*   **Message Schema (JSON fields)**:\n    ```json\n    {\n      \"shard_id\": \"UUID\",\n      \"available_capacity\": \"float\",\n      \"deadline_ms\": \"long\",\n      \"resource_requirements\": \"object\",\n      \"steal_request_nonce\": \"string\"\n    }\n    ```\n*   **Failure Modes**: Priority inversion where low-priority tasks block high-priority recovery; cyclic dependency causing task ping-pong.\n\n## Phase 4: Recover & Reintegrate\n\n### Mechanism 1: Canary Traffic Shadowing\n*   **Named Protocol**: `ShadowModeValidation` (SMV)\n*   **Specific Timing**: 5000ms observation window\n*   **Named Algorithm**: `TTestStatisticalSignificance`\n*   **Message Schema (JSON fields)**:\n    ```json\n    {\n      \"test_id\": \"UUID\",\n      \"recovered_agent\": \"UUID\",\n      \"input_payload_hash\": \"string\",\n      \"shadow_output\": \"object\",\n      \"control_output\": \"object\",\n      \"diff_score\": \"float\"\n    }\n    ```\n*   **Failure Modes**: Non-deterministic outputs creating false negatives during comparison; latency spikes in the control agent affecting the baseline.\n\n### Mechanism 2: Distributed State Sync\n*   **Named Protocol**: `VectorClockReconciliation` (VCR)\n*   **Specific Timing**: 300ms sync interval (until convergence)\n*   **Named Algorithm**: `MerkleTreeDifferentialSync`\n*   **Message Schema (JSON fields)**:\n    ```json\n    {\n      \"sync_session_id\": \"UUID\",\n      \"vector_clock\": \"map<agent_id, counter>\",\n      \"merkle_root\": \"string\",\n      \"missing_ranges\": \"list<object>\",\n      \"commit_hash\": \"string\"\n    }\n    ```\n*   **Failure Modes**: Conflicting updates requiring manual intervention (unresolved divergent histories); sync thrashing limiting system availability.\n\n## Phase 5: Post-Incident Learning\n\n### Mechanism 1: Automated Causal Logging\n*   **Named Protocol**: `BlackBoxTraceLogger` (BBL)\n*   **Specific Timing**: 50ms write latency (async processing)\n*   **Named Algorithm**: `TraceContextPropagation` with `RandomForestFeatureImportance`\n*   **Message Schema (JSON fields)**:\n    ```json\n      {\n      \"trace_id\": \"UUID\",\n      \"root_cause_hypothesis\": \"string\",\n      \"feature_vector\": \"float[]\",\n      \"outcome_label\": \"string\",\n      \"log_blob_uri\": \"string\"\n    }\n    ```\n*   **Failure Modes**: Data loss if persistent storage fails; poisoning of the learning model by uncorrelated logs.\n\n### Mechanism 2: Parameter & Policy Update\n*   **Named Protocol**: `FeedbackLoopOptimizer` (FLO)\n*   **Specific Timing**: 24h batch cycle (or event-triggered 1000ms update)\n*   **Named Algorithm**: `ProximalPolicyOptimization` (PPO)\n*   **Message Schema (JSON fields)**:\n    ```json\n    {\n      \"policy_version\": \"string\",\n      \"update_type\": \"enum\",\n      \"reward_delta\": \"float\",\n      \"constraint_adjustments\": \"object\",\n      \"model_checkpoint\": \"string\"\n    }\n    ```\n*   **Failure Modes**: Catastrophic forgetting (overwriting valid logic with outlier fixes); slow propagation of new policies leading to recurrence.",
+    "time": 5.73,
+    "words": 641
+  },
+  "multi_agent": {
+    "specialists": [
+      {
+        "agent_role": "Systems Architect",
+        "phase": "Detect",
+        "mechanisms": [
+          {
+            "name": "NodeLivenessDetector",
+            "protocol": "UDP",
+            "timing_ms": 200,
+            "threshold": "3 missed heartbeats",
+            "algorithm": "Phi Accrual",
+            "message_schema": {
+              "node_id": "string",
+              "seq_no": "int"
+            },
+            "failure_modes": [
+              "Network Partition",
+              "Kernel Panic"
+            ]
+          },
+          {
+            "name": "APIHealthChecker",
+            "protocol": "HTTP2",
+            "timing_ms": 500,
+            "threshold": "HTTP 503 status",
+            "algorithm": "Active Probe",
+            "message_schema": {
+              "uri": "/healthz",
+              "method": "GET"
+            },
+            "failure_modes": [
+              "Service Deadlock",
+              "Resource Starvation"
+            ]
+          },
+          {
+            "name": "ClusterMembershipGossiper",
+            "protocol": "UDP",
+            "timing_ms": 1000,
+            "threshold": "SUSPECT state timeout",
+            "algorithm": "SWIM",
+            "message_schema": {
+              "type": "ping-ack",
+              "incarnation": "int64"
+            },
+            "failure_modes": [
+              "Split Brain",
+              "Unstable Latency"
+            ]
+          }
+        ]
+      },
+      {
+        "agent_role": "Orchestration Node",
+        "phase": "Remediation",
+        "mechanisms": [
+          {
+            "name": "CommandPropagation",
+            "protocol": "AMQP",
+            "timing_ms": 15,
+            "threshold": "authorization received",
+            "algorithm": "FanOut",
+            "message_schema": {
+              "cmd_uuid": "UUID",
+              "target_group": "str",
+              "payload": "bytes",
+              "ttl": "int32"
+            },
+            "failure_modes": [
+              "queue overflow",
+              "timeout"
+            ]
+          },
+          {
+            "name": "StateReplication",
+            "protocol": "TCP",
+            "timing_ms": 150,
+            "threshold": "dirty flag set",
+            "algorithm": "TwoPhaseCommit",
+            "message_schema": {
+              "txn_id": "UUID",
+              "state_diff": "map",
+              "node_status": "enum",
+              "ack": "bool"
+            },
+            "failure_modes": [
+              "network partition",
+              "lock contention"
+            ]
+          }
+        ]
+      },
+      {
+        "agent_role": "Security Sentinel",
+        "phase": "Containment",
+        "mechanisms": [
+          {
+            "name": "AccessControl",
+            "protocol": "REST",
+            "timing_ms": 75,
+            "tiers": {
+              "S0": {
+                "quorum": 1,
+                "action": "allow",
+                "sla_ms": 50
+              },
+              "S1": {
+                "quorum": 2,
+                "action": "challenge",
+                "sla_ms": 300
+              },
+              "S2": {
+                "quorum": 5,
+                "requires": "mfa_token",
+                "sla_ms": 2000
+              }
+            },
+            "failure_modes": [
+              "gateway_timeout",
+              "policy_conflict"
+            ]
+          },
+          {
+            "name": "ThreatStream",
+            "protocol": "AMQP",
+            "algorithm": "Pub/Sub",
+            "message_schema": {
+              "event_id": "UUID",
+              "source_ip": "str",
+              "severity": "int",
+              "ts": "UnixNano",
+              "signature": "str"
+            },
+            "failure_modes": [
+              "queue_exhaustion",
+              "consumer_deadlock"
+            ]
+          }
+        ]
+      },
+      {
+        "agent_role": "ClusterOrchestrator",
+        "phase": "LoadBalancing",
+        "mechanisms": [
+          {
+            "name": "FailoverHandler",
+            "protocol": "AMQP",
+            "timing_ms": 100,
+            "threshold": "liveness_timeout",
+            "algorithm": "consistent_hashing",
+            "message_schema": {
+              "correlation_id": "UUID",
+              "priority": "int",
+              "partition_key": "str",
+              "ttl_ms": "int64"
+            },
+            "failure_modes": [
+              "split_brain",
+              "idempotency_violation"
+            ]
+          },
+          {
+            "name": "ElasticScaler",
+            "protocol": "Redis",
+            "timing_ms": 50,
+            "threshold": "utilization < 0.8",
+            "algorithm": "weighted_round_robin",
+            "failure_modes": [
+              "race_condition",
+              "inconsistent_view"
+            ]
+          },
+          {
+            "name": "FlowControl",
+            "protocol": "gRPC",
+            "threshold": "pending_requests > 1000",
+            "algorithm": "token_bucket",
+            "failure_modes": [
+              "buffer_overflow",
+              "head_of_line_blocking"
+            ]
+          }
+        ]
+      },
+      {
+        "agent_role": "Security Operations Center (SOC) Analyst",
+        "phase": "Investigate",
+        "mechanisms": [
+          {
+            "name": "ThreatLogIngestion",
+            "protocol": "Splunk HEC",
+            "threshold": "on_rule_trigger",
+            "metrics": [
+              "signature_id",
+              "source_ip_reputation",
+              "destination_port_access",
+              "payload_entropy"
+            ],
+            "message_schema": {
+              "event_id": "UUID",
+              "timestamp_iso": "str",
+              "severity_score": "int",
+              "mitre_tactics": "[]str"
+            },
+            "failure_modes": [
+              "log_stream_delay",
+              "parsing_error"
+            ]
+          },
+          {
+            "name": "AttackGraphMapping",
+            "protocol": "WebSocket",
+            "algorithm": "Node-Link Diagram",
+            "schema": {
+              "node": "IOC",
+              "edges": [
+                "COMMUNICATES_WITH",
+                "EXPLOITS",
+                "INDICATES_COMPROMISE"
+              ]
+            },
+            "failure_modes": [
+              "relationship_timeout",
+              "graph_schema_mismatch"
+            ]
+          },
+          {
+            "name": "FalsePositiveFilter",
+            "threshold": "confidence < 0.4",
+            "algorithm": "Bayesian Classification",
+            "failure_modes": [
+              "whitelist_override",
+              "context_data_missing"
+            ]
+          }
+        ]
+      },
+      {
+        "agent_role": "Safety Alignment Sentinel",
+        "phase": "Restitution",
+        "mechanisms": [
+          {
+            "name": "SemanticGuard",
+            "protocol": "HTTPS/WebSocket",
+            "threshold": "5 consecutive benign adversarial probes",
+            "algorithm": "Toxicity Vector Projection",
+            "failure_modes": [
+              "prompt injection bypass",
+              "jailbreak detection blindspot"
+            ]
+          },
+          {
+            "name": "ShadowTrafficRamp",
+            "protocol": "Service Mesh (Istio)",
+            "stages": [
+              {
+                "pct": 5,
+                "hold_s": 30
+              },
+              {
+                "pct": 25,
+                "hold_s": 45
+              },
+              {
+                "pct": 100,
+                "hold_s": 0
+              }
+            ],
+            "threshold": "latency_p99 < 200ms",
+            "failure_modes": [
+              "token limit overflow",
+              "congestion collapse"
+            ]
+          },
+          {
+            "name": "EmbeddingSync",
+            "protocol": "gRPC Streaming",
+            "timing_ms": 150,
+            "algorithm": "Consistent Hashing Rebalancing",
+            "failure_modes": [
+              "high-dimensional drift",
+              "partition desync"
+            ]
+          }
+        ]
+      }
+    ],
+    "synthesis": "## TL;DR\nThis protocol synthesizes specialist inputs into a 5-phase incident response workflow. **Phase 1 (Detect)** utilizes UDP heartbeats (Phi Accrual) and HTTP2 probes to identify failures like Network Partitions or Kernel Panics. **Phase 2 (Alert & Communication)** ingests these events via Splunk HEC and AMQP ThreatStreams. **Phase 3 (Redistribute Work)** employs AMQP Failover (consistent hashing) and Redis-backed Scaling (utilization < 0.8) to maintain flow via gRPC token buckets. **Phase 4 (Recover & Reintegrate)** executes Remediation (AMQP FanOut, TCP TwoPhaseCommit) and Restitution (Istio ShadowTrafficRamp) while enforcing Safety (SemanticGuard). **Phase 5 (Post-Incident Learning)** performs graph analysis and Bayesian filtering on the incident data.\n\n## Phase 1: Detect\n*Source: Systems Architect*\n\n*   **Mechanism: NodeLivenessDetector**\n    *   Protocol: `UDP`\n    *   Timing: `200 ms`\n    *   Threshold: `3 missed heartbeats`\n    *   Algorithm: `Phi Accrual`\n    *   Message Schema: `{\"node_id\": \"string\", \"seq_no\": \"int\"}`\n    *   Failure Modes: `Network Partition`, `Kernel Panic`\n\n*   **Mechanism: APIHealthChecker**\n    *   Protocol: `HTTP2`\n    *   Timing: `500 ms`\n    *   Threshold: `HTTP 503 status`\n    *   Algorithm: `Active Probe`\n    *   Message Schema: `{\"uri\": \"/healthz\", \"method\": \"GET\"}`\n    *   Failure Modes: `Service Deadlock`, `Resource Starvation`\n\n*   **Mechanism: ClusterMembershipGossiper**\n    *   Protocol: `UDP`\n    *   Timing: `1000 ms`\n    *   Threshold: `SUSPECT state timeout`\n    *   Algorithm: `SWIM`\n    *   Message Schema: `{\"type\": \"ping-ack\", \"incarnation\": \"int64\"}`\n    *   Failure Modes: `Split Brain`, `Unstable Latency`\n\n## Phase 2: Alert & Communication\n*Source: Security Sentinel, Security Operations Center (SOC) Analyst*\n\n*   **Mechanism: ThreatStream**\n    *   Protocol: `AMQP`\n    *   Algorithm: `Pub/Sub`\n    *   Message Schema: `{\"event_id\": \"UUID\", \"source_ip\": \"str\", \"severity\": \"int\", \"ts\": \"UnixNano\", \"signature\": \"str\"}`\n    *   Failure Modes: `queue_exhaustion`, `consumer_deadlock`\n\n*   **Mechanism: ThreatLogIngestion**\n    *   Protocol: `Splunk HEC`\n    *   Threshold: `on_rule_trigger`\n    *   Metrics: `signature_id`, `source_ip_reputation`, `destination_port_access`, `payload_entropy`\n    *   Message Schema: `{\"event_id\": \"UUID\", \"timestamp_iso\": \"str\", \"severity_score\": \"int\", \"mitre_tactics\": \"[]str\"}`\n    *   Failure Modes: `log_stream_delay`, `parsing_error`\n\n## Phase 3: Redistribute Work\n*Source: ClusterOrchestrator*\n\n*   **Mechanism: FailoverHandler**\n    *   Protocol: `AMQP`\n    *   Timing: `100 ms`\n    *   Threshold: `liveness_timeout`\n    *   Algorithm: `consistent_hashing`\n    *   Message Schema: `{\"correlation_id\": \"UUID\", \"priority\": \"int\", \"partition_key\": \"str\", \"ttl_ms\": \"int64\"}`\n    *   Failure Modes: `split_brain`, `idempotency_violation`\n\n*   **Mechanism: ElasticScaler**\n    *   Protocol: `Redis`\n    *   Timing: `50 ms`\n    *   Threshold: `utilization < 0.8`\n    *   Algorithm: `weighted_round_robin`\n    *   Message Schema: `unspecified`\n    *   Failure Modes: `race_condition`, `inconsistent_view`\n\n*   **Mechanism: FlowControl**\n    *   Protocol: `gRPC`\n    *   Timing: `unspecified`\n    *   Threshold: `pending_requests > 1000`\n    *   Algorithm: `token_bucket`\n    *   Message Schema: `unspecified`\n    *   Failure Modes: `buffer_overflow`, `head_of_line_blocking`\n\n## Phase 4: Recover & Reintegrate\n*Source: Orchestration Node, Safety Alignment Sentinel, Security Sentinel*\n\n*   **Mechanism: CommandPropagation**\n    *   Protocol: `AMQP`\n    *   Timing: `15 ms`\n    *   Threshold: `authorization received`\n    *   Algorithm: `FanOut`\n    *   Message Schema: `{\"cmd_uuid\": \"UUID\", \"target_group\": \"str\", \"payload\": \"bytes\", \"ttl\": \"int32\"}`\n    *   Failure Modes: `queue overflow`, `timeout`\n\n*   **Mechanism: StateReplication**\n    *   Protocol: `TCP`\n    *   Timing: `150 ms`\n    *   Threshold: `dirty flag set`\n    *   Algorithm: `TwoPhaseCommit`\n    *   Message Schema: `{\"txn_id\": \"UUID\", \"state_diff\": \"map\", \"node_status\": \"enum\", \"ack\": \"bool\"}`\n    *   Failure Modes: `network partition`, `lock contention`\n\n*   **Mechanism: SemanticGuard**\n    *   Protocol: `HTTPS/WebSocket`\n    *   Timing: `unspecified`\n    *   Threshold: `5 consecutive benign adversarial probes`\n    *   Algorithm: `Toxicity Vector Projection`\n    *   Message Schema: `unspecified`\n    *   Failure Modes: `prompt injection bypass`, `jailbreak detection blindspot`\n\n*   **Mechanism: ShadowTrafficRamp**\n    *   Protocol: `Service Mesh (Istio)`\n    *   Timing: `unspecified`\n    *   Threshold: `latency_p99 < 200ms`\n    *   Stages: `[{\"pct\": 5, \"hold_s\": 30}, {\"pct\": 25, \"hold_s\": 45}, {\"pct\": 100, \"hold_s\": 0}]`\n    *   Failure Modes: `token limit overflow`, `congestion collapse`\n\n*   **Mechanism: EmbeddingSync**\n    *   Protocol: `gRPC Streaming`\n    *   Timing: `150 ms`\n    *   Algorithm: `Consistent Hashing Rebalancing`\n    *   Message Schema: `unspecified`\n    *   Failure Modes: `high-dimensional drift`, `partition desync`\n\n*   **Mechanism: AccessControl**\n    *   Protocol: `REST`\n    *   Timing: `75 ms`\n    *   Tiers: `S0: quorum=1, action=allow, sla_ms=50` | `S1: quorum=2, action=challenge, sla_ms=300` | `S2: quorum=5, requires=mfa_token, sla_ms=2000`\n    *   Message Schema: `unspecified`\n    *   Failure Modes: `gateway_timeout`, `policy_conflict`\n\n## Phase 5: Post-Incident Learning\n*Source: Security Operations Center (SOC) Analyst*\n\n*   **Mechanism: AttackGraphMapping**\n    *   Protocol: `WebSocket`\n    *   Algorithm: `Node-Link Diagram`\n    *   Schema: `{\"node\": \"IOC\", \"edges\": [\"COMMUNICATES_WITH\", \"EXPLOITS\", \"INDICATES_COMPROMISE\"]}`\n    *   Failure Modes: `relationship_timeout`, `graph_schema_mismatch`\n\n*   **Mechanism: FalsePositiveFilter**\n    *   Protocol: `unspecified`\n    *   Timing: `unspecified`\n    *   Threshold: `confidence < 0.4`\n    *   Algorithm: `Bayesian Classification`\n    *   Message Schema: `unspecified`\n    *   Failure Modes: `whitelist_override`, `context_data_missing`\n\n## Open Questions\n1.  **Timing for Alerting**: `ThreatStream` and `ThreatLogIngestion` lack specified `timing_ms` values in the inputs; alert latency is therefore unspecified.\n2.  **FlowControl Schema**: The `message_schema` for `FlowControl` is unspecified in the input.\n3.  **Safety Mechanism Schemas**: `SemanticGuard`, `EmbeddingSync`, and `AccessControl` mechanisms have unspecified message schemas in the inputs.\n4.  **Investigation Timing**: `AttackGraphMapping` and `FalsePositiveFilter` have unspecified `timing_ms`.\n\n## Integration Points\n1.  **Detect \u2192 Alert**: `NodeLivenessDetector` or `APIHealthChecker` failures trigger `ThreatLogIngestion` via Splunk HEC and `ThreatStream` via AMQP.\n2.  **Alert \u2192 Redistribute**: `ThreatLogIngestion` rule triggers activate `FailoverHandler` and `ElasticScaler` to reroute traffic.\n3.  **Redistribute \u2192 Recover**: Once `FlowControl` stabilizes the queue (pending_requests < 1000), `CommandPropagation` authorizes `StateReplication` and `ShadowTrafficRamp` begins.\n4.  **Recover \u2192 Learn**: Successful completion of `ShadowTrafficRamp` (latency_p99 < 200ms) signals the start of `AttackGraphMapping` and `FalsePositiveFilter` analysis.",
+    "synthesis_time": 7.42,
+    "words": 781,
+    "synthesis_method": "single full-context call"
+  },
+  "scores": {
+    "A": {
+      "coverage": 18,
+      "depth": 17,
+      "coherence": 18,
+      "implementability": 17,
+      "edge_cases": 16,
+      "total": 86,
+      "strength": "PPO for policy learning, RobustRandomCutForest for semantic drift, MerkleTreeDifferentialSync, full JSON schemas on every mechanism",
+      "weakness": "Shorter response (641 words) \u2014 fewer mechanisms than best runs"
+    },
+    "B": {
+      "coverage": 17,
+      "depth": 16,
+      "coherence": 17,
+      "implementability": 17,
+      "edge_cases": 16,
+      "total": 83,
+      "strength": "No hallucination \u2014 synthesizer faithfully preserved specialist values. Phase 1 and Phase 3 are excellent (correct domain, correct values). 'Unspecified' rule followed correctly.",
+      "weakness": "Specialist domain drift: 'incident response' triggered cybersecurity training data. Coordination Specialist \u2192 SOC Analyst, Network Analyst \u2192 cybersec IOC graph. Wrong context for AI org.",
+      "key_lesson": "Specialist prompts must explicitly ground the domain: 'AI LLM-based agent organization, NOT cybersecurity, NOT network devices. Agents are AI software agents.'"
+    }
+  },
+  "run5_final": {
+    "single": 86,
+    "multi": 83,
+    "delta": -3
+  },
+  "critical_lesson": "Specialist prompts must explicitly ground the domain: 'AI LLM-based agent organization, NOT cybersecurity, NOT network devices. Agents are AI software agents.'",
+  "evolution_table": [
+    [
+      1,
+      90,
+      73,
+      -17
+    ],
+    [
+      2,
+      84,
+      87,
+      3
+    ],
+    [
+      3,
+      85,
+      87,
+      2
+    ],
+    [
+      4,
+      92,
+      68,
+      -24
+    ],
+    [
+      5,
+      86,
+      83,
+      -3
+    ]
+  ]
+}

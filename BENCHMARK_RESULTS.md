@@ -113,3 +113,35 @@ Expected improvement: Coverage 16 → 18, potentially pushing MA to 90+.
 
 ### Run 5 Fix
 Single synthesis call. Max_tokens raised to 8000. Full specialist JSON, no truncation. If Cerebras returns empty content, retry once with +2000 tokens. Fallback: same synthesis prompt sent to Claude if 3 attempts fail.
+
+---
+
+## Run 5 — Synthesis Fixed, Domain Drift Exposed
+
+| Dimension | Single Agent | Multi-Agent Org |
+|-----------|-------------|-----------------|
+| Coverage | **18/20** | 17/20 |
+| Technical Depth | **17/20** | 16/20 |
+| Coherence | **18/20** | 17/20 |
+| Implementability | 17/20 | 17/20 |
+| Edge Cases | 16/20 | 16/20 |
+| **TOTAL** | **86/100** | **83/100** · **Delta: −3** |
+
+### What Was Fixed (Compared to Run 4)
+- Single synthesis call with full untruncated specialist JSON — **no hallucination** ✅
+- Model correctly marked unspecified values as `"unspecified"` per the rule ✅
+- Phase 1 (Detect) and Phase 3 (Redistribute) preserved specialist values perfectly ✅
+
+### New Issue Found: Specialist Domain Drift
+The "incident response" framing triggers the model's cybersecurity training data:
+- Coordination Specialist → generated "SOC Analyst" with Splunk HEC + MITRE ATT&CK — **wrong domain**
+- Network Analyst → generated "Security Operations Center" with IOC knowledge graphs — **wrong domain**
+- Only Systems Architect and Emergence Engineer stayed on-domain (AI org, not cybersecurity)
+
+The synthesis faithfully used what specialists produced — the synthesis step is now reliable. The problem is upstream.
+
+### Protocol Amendment (committed to fleet-governance)
+> *All specialist prompts must include explicit domain grounding: "You are a specialist AI agent in a multi-agent LLM software organization. This is NOT a cybersecurity context. Agents are LLM-based software agents, not network devices. Do not use SIEM, SOC, MITRE ATT&CK, or network security terminology."*
+
+### Run 6 Fix
+Prepend domain grounding sentence to every specialist prompt. Expected effect: all 5 specialists stay in AI org context → MA technical depth should reach 19+ → delta positive again.
