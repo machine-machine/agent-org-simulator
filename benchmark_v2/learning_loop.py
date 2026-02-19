@@ -20,6 +20,7 @@ from .topologies import TOPOLOGY_RUNNERS, TopologyResult
 from .evaluator import evaluate_blind, EvalResult, format_eval_summary
 from .retrospective import run_retrospective, FixProposal
 from .llm_clients import cerebras_call
+from .default_org_memory import get_default_memory
 
 
 @dataclass
@@ -35,6 +36,7 @@ class IterationRecord:
     ma_std: float
     failure_mode: str
     protocol_fix: str
+    token_summary: dict = field(default_factory=dict)  # cost data for this MA run
     timestamp: str = field(default_factory=lambda: datetime.datetime.now().isoformat())
 
 
@@ -87,7 +89,16 @@ def learning_loop(
     Algorithm 1: Formal Organizational Learning Loop.
     """
     result = LearningResult(task_id=task.id, topology=topology)
-    result.org_memory = org_memory or {}
+
+    # Seed org_memory: merge default lessons (Run 6) with any provided memory.
+    # For new tasks (no prior runs), this gives the org learned lessons from day 1
+    # so we don't repeat the failure→recovery arc seen in runs 1-6.
+    base_memory = get_default_memory()
+    if org_memory:
+        # Provided memory (cross-topology transfer) takes precedence over defaults
+        base_memory.update(org_memory)
+    result.org_memory = base_memory
+
     run_fn = TOPOLOGY_RUNNERS[topology]
     t_start = time.time()
 
@@ -105,8 +116,10 @@ def learning_loop(
             print(f"  [MA Org] Running {topology} topology...")
         topo_result: TopologyResult = run_fn(task, org_memory=result.org_memory)
         ma_output = topo_result.final_output
+        tok = topo_result.token_summary or {}
         if verbose:
-            print(f"  [MA Org] Done — {len(ma_output.split())} words, {topo_result.total_time:.1f}s")
+            cost_str = f"  ${tok.get('cost_usd', 0):.4f}" if tok else ""
+            print(f"  [MA Org] Done — {len(ma_output.split())} words, {topo_result.total_time:.1f}s{cost_str}")
 
         # Blind evaluation
         if verbose:
@@ -130,6 +143,7 @@ def learning_loop(
             ma_std=eval_result.ma_std,
             failure_mode="",
             protocol_fix="",
+            token_summary=topo_result.token_summary or {},
         )
 
         # Check convergence
@@ -207,6 +221,7 @@ def _result_to_dict(result: LearningResult) -> dict:
                 "ma_std": r.ma_std,
                 "failure_mode": r.failure_mode,
                 "protocol_fix": r.protocol_fix,
+                "token_summary": r.token_summary,
                 "timestamp": r.timestamp,
             }
             for r in result.iterations

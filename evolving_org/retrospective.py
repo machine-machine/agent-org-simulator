@@ -2,6 +2,10 @@
 """
 MachineMachine Evolving Org — Retrospective Engine
 Runs after every benchmark. Commits lessons. Updates protocols.
+
+Feedback loops (added 2026-02-19):
+- Task 2: Extracts top technical discoveries → content_queue.json (content-org)
+- Task 3: Updates strategy_context.md (content-org) after each run
 """
 import json, sys, os, subprocess, datetime, re
 from pathlib import Path
@@ -18,6 +22,13 @@ def _load_cerebras_key():
 CEREBRAS_KEY = _load_cerebras_key()
 CEREBRAS_URL = "https://api.cerebras.ai/v1/chat/completions"
 
+# ── Shared file paths (content-org feedback loops) ───────────────────────────
+# From: projects/agent-org-simulator/evolving_org/ → up 3 → projects/content-org/
+_THIS_DIR = Path(__file__).parent
+CONTENT_ORG_DIR = _THIS_DIR.parent.parent / "content-org"
+CONTENT_QUEUE_FILE = CONTENT_ORG_DIR / "content_queue.json"
+STRATEGY_CONTEXT_FILE = CONTENT_ORG_DIR / "strategy_context.md"
+
 def cerebras_call(prompt, max_tokens=2000):
     resp = httpx.post(CEREBRAS_URL, 
         headers={"Authorization": f"Bearer {CEREBRAS_KEY}", "Content-Type": "application/json"},
@@ -26,6 +37,234 @@ def cerebras_call(prompt, max_tokens=2000):
     msg = resp.json()["choices"][0]["message"]
     # zai-glm-4.7 may return 'reasoning' instead of 'content'
     return msg.get("content") or msg.get("reasoning") or ""
+
+
+# ── Task 2: Extract technical discoveries → content_queue.json ───────────────
+
+def extract_content_queue_items(retro: dict, run_id: str, results_text: str) -> list[dict]:
+    """
+    Ask Cerebras to extract top 2-3 technical discoveries from the benchmark run
+    and format them as content queue items for the content-org flywheel.
+    """
+    key_finding = retro.get("key_finding", "")
+    run_summary = retro.get("run_summary", "")
+    memories = retro.get("memories", [])
+    memories_text = "\n".join(
+        f"  [{m.get('agent', '?')}] {m.get('memory', '')}" for m in memories
+    )
+
+    prompt = f"""You are extracting publishable technical discoveries from a MachineMachine benchmark run.
+
+RUN ID: {run_id}
+KEY FINDING: {key_finding}
+SUMMARY: {run_summary}
+AGENT MEMORIES:
+{memories_text}
+
+BENCHMARK RESULTS EXCERPT:
+{results_text[:3000]}
+
+Extract the 2-3 most concrete, publishable technical discoveries. Focus on:
+- Specific algorithms or protocols discovered (e.g., "Phi Accrual failure detection outperformed simple timeout")
+- Architectural patterns proven by the benchmark (e.g., "star topology outperforms mesh for coordination tasks")
+- Counter-intuitive findings (e.g., "more agents doesn't mean better — 3 outperformed 5 on focused tasks")
+- Mechanisms that have clear arXiv research backing
+
+For each discovery, provide an arXiv search hint (keywords to find related papers).
+
+Output ONLY valid JSON array, no markdown fences:
+[
+  {{
+    "source": "{run_id}",
+    "topic": "Specific technical discovery in one concrete sentence",
+    "arxiv_hint": "2-4 keywords to search arXiv for related papers",
+    "priority": "high",
+    "added": "{datetime.date.today().isoformat()}",
+    "used": false
+  }}
+]
+
+Return 2-3 items maximum. Only include discoveries that would make interesting blog posts about AI org design."""
+
+    print("  📋 Extracting content queue items...")
+    raw = cerebras_call(prompt, max_tokens=1000)
+
+    # Parse JSON array — handle reasoning model output (may emit thinking chain before JSON)
+    clean = re.sub(r"```json\s*", "", raw)
+    clean = re.sub(r"```\s*", "", clean)
+    # Try all JSON arrays found, use the last complete one (model may emit partial then full)
+    arr_candidates = list(re.finditer(r'\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\[\]]*\])*\])*\]', clean, re.DOTALL))
+    items = None
+    for m in sorted(arr_candidates, key=lambda x: len(x.group()), reverse=True):
+        try:
+            parsed = json.loads(m.group())
+            if isinstance(parsed, list) and parsed and "topic" in parsed[0]:
+                items = parsed
+                break
+        except json.JSONDecodeError:
+            continue
+
+    if items:
+        valid = []
+        for item in items:
+            if isinstance(item, dict) and "topic" in item:
+                item["source"] = run_id
+                item["added"] = datetime.date.today().isoformat()
+                item["used"] = False
+                item.setdefault("priority", "high")
+                item.setdefault("arxiv_hint", "multi-agent AI systems")
+                valid.append(item)
+        if valid:
+            return valid
+
+    # ── Fallback: construct items from retro data directly ───────────────
+    print(f"  ⚠️  Cerebras JSON parse failed — using retro data directly")
+    fallback_items = []
+
+    # Use key_finding as primary topic
+    if key_finding and len(key_finding) > 20:
+        # Derive arxiv_hint from key finding words
+        hint_words = [w for w in key_finding.lower().split() if len(w) > 4][:4]
+        fallback_items.append({
+            "source": run_id,
+            "topic": key_finding[:200],
+            "arxiv_hint": " ".join(hint_words) if hint_words else "multi-agent AI organization",
+            "priority": "high",
+            "added": datetime.date.today().isoformat(),
+            "used": False,
+        })
+
+    # Use highest-importance memory as second item
+    sorted_mems = sorted(memories, key=lambda m: m.get("importance", 0), reverse=True)
+    for mem in sorted_mems[:1]:
+        mem_text = mem.get("memory", "")
+        if mem_text and len(mem_text) > 20 and mem_text != key_finding[:len(mem_text)]:
+            hint_words = [w for w in mem_text.lower().split() if len(w) > 4][:4]
+            fallback_items.append({
+                "source": run_id,
+                "topic": mem_text[:200],
+                "arxiv_hint": " ".join(hint_words) if hint_words else "LLM agent coordination",
+                "priority": "high",
+                "added": datetime.date.today().isoformat(),
+                "used": False,
+            })
+
+    if fallback_items:
+        print(f"  ✅ Fallback: created {len(fallback_items)} queue items from retro data")
+    return fallback_items
+
+
+def append_to_content_queue(items: list[dict]):
+    """Append new items to content_queue.json in content-org."""
+    if not items:
+        return
+
+    CONTENT_ORG_DIR.mkdir(parents=True, exist_ok=True)
+
+    existing = []
+    if CONTENT_QUEUE_FILE.exists():
+        try:
+            existing = json.loads(CONTENT_QUEUE_FILE.read_text())
+        except Exception:
+            existing = []
+
+    # Avoid duplicate topics (simple dedup by topic prefix)
+    existing_topics = {e.get("topic", "")[:50].lower() for e in existing}
+    new_items = [
+        item for item in items
+        if item.get("topic", "")[:50].lower() not in existing_topics
+    ]
+
+    if new_items:
+        existing.extend(new_items)
+        CONTENT_QUEUE_FILE.write_text(json.dumps(existing, indent=2))
+        print(f"  ✅ Added {len(new_items)} items to content_queue.json → {CONTENT_QUEUE_FILE}")
+        for item in new_items:
+            print(f"     - {item['topic'][:70]}")
+    else:
+        print(f"  ℹ️  No new content queue items (already queued or empty)")
+
+
+# ── Task 3: Update strategy_context.md ───────────────────────────────────────
+
+def update_strategy_context(retro: dict, run_id: str, run_number: int = None):
+    """
+    Write/update the shared strategy context file that the content-org Brand Voice
+    and Scout agents read before generating content.
+    """
+    key_finding = retro.get("key_finding", "N/A")
+    run_summary = retro.get("run_summary", "N/A")
+    next_recs = retro.get("next_run_recommendations", [])
+    hypothesis = retro.get("improvement_hypothesis", "")
+    protocol = retro.get("protocol_suggestion", {}) or {}
+    single = retro.get("single_agent_score", "?")
+    multi = retro.get("multi_agent_score", "?")
+    delta = retro.get("delta", "?")
+
+    # Build arxiv keyword clusters from what improved performance
+    arxiv_keywords = []
+    if protocol:
+        title = protocol.get("title", "")
+        if title:
+            # Convert protocol title to keyword clusters
+            words = [w for w in title.lower().split() if len(w) > 3]
+            if words:
+                arxiv_keywords.append(" ".join(words[:3]) + " multi-agent")
+    # Add from recommendations
+    for rec in next_recs[:2]:
+        rec_words = [w for w in rec.lower().split() if len(w) > 4][:3]
+        if rec_words:
+            arxiv_keywords.append(" ".join(rec_words))
+
+    # Fallback keywords
+    if not arxiv_keywords:
+        arxiv_keywords = ["multi-agent coordination AI", "LLM organization learning"]
+
+    # Load KPI data for tone guidance (if available)
+    kpi_tone_guidance = "Data-backed, technical specificity drives engagement"
+    org_memory_file = CONTENT_ORG_DIR / "results" / "org_memory.json"
+    if org_memory_file.exists():
+        try:
+            mem = json.loads(org_memory_file.read_text())
+            patterns = mem.get("content_patterns", [])
+            if patterns:
+                kpi_tone_guidance = "; ".join(patterns[:2])
+        except Exception:
+            pass
+
+    run_num_str = f"#{run_number}" if run_number else run_id
+    today = datetime.date.today().isoformat()
+
+    content = f"""# Content Strategy Context (auto-updated by weekly org evolution)
+Last updated: {today} | Run: {run_num_str}
+
+## What the org proved this week
+- {key_finding}
+- Multi-agent score: {multi}/100, Single-agent score: {single}/100, Delta: {delta}
+- {run_summary}
+
+## Benchmark improvement hypothesis
+{hypothesis if hypothesis else "Continue refining specialist coordination patterns"}
+
+## Concepts to explore on arXiv
+{chr(10).join(f'- {kw}' for kw in arxiv_keywords[:3])}
+
+## Tone guidance from KPIs
+- {kpi_tone_guidance}
+- Show concrete mechanisms, not just conclusions
+- Include failure modes and open questions — builds credibility
+
+## Protocol proposed this run
+{f"- {protocol.get('title', 'N/A')}: {protocol.get('description', '')[:120]}" if protocol else "- No protocol proposed this run"}
+
+## Next run focus areas
+{chr(10).join(f'- {r}' for r in next_recs[:3]) if next_recs else '- Continue current approach'}
+"""
+
+    CONTENT_ORG_DIR.mkdir(parents=True, exist_ok=True)
+    STRATEGY_CONTEXT_FILE.write_text(content)
+    print(f"  ✅ strategy_context.md updated → {STRATEGY_CONTEXT_FILE}")
+
 
 def run_retrospective(results_file: str, run_id: str = None):
     results = Path(results_file).read_text()
@@ -196,12 +435,34 @@ Return ONLY the JSON object, no markdown fences, no explanation."""
         except subprocess.CalledProcessError as e:
             print(f"  ⚠️  Git commit failed: {e}")
     
-    # ── 4. Return structured results ────────────────────────────────────
+    # ── 4. Feedback Loop: Extract discoveries → content_queue.json ─────
+    print(f"\n  🔗 Feedback Loop: Extracting content queue items...")
+    try:
+        queue_items = extract_content_queue_items(retro, run_id, results)
+        append_to_content_queue(queue_items)
+    except Exception as e:
+        print(f"  ⚠️  Content queue extraction failed: {e}")
+
+    # ── 5. Feedback Loop: Update strategy_context.md ───────────────────
+    print(f"\n  🗺️  Feedback Loop: Updating content strategy context...")
+    try:
+        # Infer run number from run_id if possible
+        run_num = None
+        m = re.search(r'(\d+)', run_id)
+        if m:
+            run_num = int(m.group(1))
+        update_strategy_context(retro, run_id, run_number=run_num)
+    except Exception as e:
+        print(f"  ⚠️  Strategy context update failed: {e}")
+
+    # ── 6. Return structured results ────────────────────────────────────
     return {
         "run_id": run_id,
         "retro": retro,
         "memories_stored": stored,
-        "protocol_proposed": bool(protocol)
+        "protocol_proposed": bool(protocol),
+        "content_queue_items": len(queue_items) if 'queue_items' in dir() else 0,
+        "strategy_context_updated": STRATEGY_CONTEXT_FILE.exists(),
     }
 
 if __name__ == "__main__":

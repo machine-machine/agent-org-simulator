@@ -1,6 +1,6 @@
 """
 BenchmarkSuite v2 — Task Definitions
-Three task domains for generalizability testing.
+Three task domains for generalizability testing, plus DeFi puzzle task.
 """
 from dataclasses import dataclass, field
 
@@ -11,6 +11,24 @@ RUBRIC_DIMENSIONS = [
     ("implementability", "A dev team could actually build this from the spec"),
     ("edge_cases",       "Handles failure modes, race conditions, degraded states"),
 ]
+
+# DeFi-specific rubric dimensions (used by puzzle_scorer, stored on task for introspection)
+DEFI_RUBRIC_DIMENSIONS = [
+    ("technical_depth",           "DeFi-specific depth: AMM math, on-chain mechanics, concrete protocol params"),
+    ("implementability",          "Could this be deployed on Solana today? Specific program IDs, API calls, tx flows"),
+    ("risk_coverage",             "Circuit breakers, IL protection, MEV defence, slippage limits, correlation controls"),
+    ("signal_specificity",        "Entry/exit triggers are exact, backtestable conditions — no vague 'buy the dip'"),
+    ("operational_completeness",  "Monitoring infra, alerting thresholds, emergency runbook, gas budget accounting"),
+]
+
+# Domain grounding prepended to every DeFi specialist prompt
+DEFI_GROUNDING = (
+    "You are a DeFi quant specialist working on an AI-driven trading system for the Solana ecosystem. "
+    "This is NOT traditional finance. Focus on on-chain mechanics: liquidity pools, AMMs, MEV, "
+    "sandwich attacks, impermanent loss, slippage, and Solana-specific transaction costs. "
+    "Use concrete values, specific protocols (Raydium, Jupiter, Meteora, Orca), and exact token "
+    "addresses where known (e.g. SOL, USDC, RAY, JUP). Avoid generic finance language."
+)
 
 @dataclass
 class SpecialistRole:
@@ -149,5 +167,93 @@ STRATEGIC_PLANNING = Task(
 )
 
 
-ALL_TASKS = [AI_INCIDENT_RESPONSE, SOFTWARE_ARCHITECTURE, STRATEGIC_PLANNING]
+DEFI_STRATEGY_DESIGN = Task(
+    id="defi_strategy_design",
+    name="DeFi Multi-Strategy Portfolio Design",
+    prompt=(
+        "Design a complete, executable DeFi trading strategy system for the Solana ecosystem "
+        "with the following HARD CONSTRAINTS that must ALL be satisfied:\n"
+        "  • Capital: €50,000 starting capital\n"
+        "  • Target: 5% weekly yield minimum\n"
+        "  • Max drawdown: 20% of capital before auto-halt\n"
+        "  • Max single position: 30% of capital\n"
+        "  • At least 3 different on-chain strategy types "
+        "(e.g. LP provision, statistical arbitrage, yield farming, sniping)\n"
+        "  • Exact entry/exit signals (not 'buy when price goes up' — real triggers)\n"
+        "  • Emergency exit procedure (full position unwind path)\n"
+        "  • Gas cost accounting (Solana tx fees + priority fees factored into returns)\n"
+        "  • Specific token pairs from Solana ecosystem: SOL/USDC, RAY/SOL, JUP/USDC, etc.\n\n"
+        "Be as technically specific as possible: include protocol addresses, pool IDs, "
+        "signal formulas, position sizing math, monitoring thresholds, and an operational runbook."
+    ),
+    specialist_roles=[
+        SpecialistRole(
+            name="Quant Strategist",
+            memory_query="entry exit signals backtestable rules expected returns",
+            domain_instruction=(
+                f"{DEFI_GROUNDING}\n\n"
+                "Your focus: signal design, entry/exit logic, and backtestable rules. "
+                "Define EXACT entry triggers (e.g. 'SOL/USDC 1h RSI < 28 AND volume > 2× 20h avg') "
+                "and exit conditions for each of the 3+ strategies. "
+                "Include expected weekly return estimates with confidence intervals. "
+                "Specify which token pairs each strategy trades and why."
+            ),
+        ),
+        SpecialistRole(
+            name="Risk Manager",
+            memory_query="drawdown controls position sizing correlation circuit breakers",
+            domain_instruction=(
+                f"{DEFI_GROUNDING}\n\n"
+                "Your focus: drawdown controls, position sizing, and circuit breakers. "
+                "Define the exact 20% drawdown halt: what triggers it, how fast it fires, "
+                "which positions are liquidated first. Specify the 30% single-position cap "
+                "enforcement mechanism. Analyze correlation between strategies (LP IL vs arb PnL). "
+                "Include specific circuit breaker timing values (e.g. 'halt if 5% loss in 1h')."
+            ),
+        ),
+        SpecialistRole(
+            name="Execution Engineer",
+            memory_query="on-chain execution gas optimization MEV protection tx routing",
+            domain_instruction=(
+                f"{DEFI_GROUNDING}\n\n"
+                "Your focus: on-chain execution mechanics and transaction efficiency. "
+                "Specify how each strategy executes on-chain: which Solana programs are called, "
+                "how tx priority fees are set dynamically, how MEV/sandwich attacks are mitigated "
+                "(Jito bundles? private RPC?). Include gas cost estimates per trade and "
+                "how those costs are deducted from PnL accounting. Routing logic for swaps "
+                "(Jupiter aggregator vs direct AMM)."
+            ),
+        ),
+        SpecialistRole(
+            name="Protocol Analyst",
+            memory_query="protocol selection Raydium Jupiter Meteora LP mechanics yield sources",
+            domain_instruction=(
+                f"{DEFI_GROUNDING}\n\n"
+                "Your focus: specific protocol selection and mechanics. "
+                "For each strategy, name the exact protocol (Raydium CLMM vs CPMM, "
+                "Meteora DLMM, Orca Whirlpools, Jupiter DCA). Specify pool IDs or "
+                "how to select the highest-yield pool at runtime. Explain LP mechanics: "
+                "fee tiers, tick ranges for CLMM, rebalancing triggers, impermanent loss "
+                "thresholds. Include current APY ranges and how they're monitored."
+            ),
+        ),
+        SpecialistRole(
+            name="Compliance & Ops",
+            memory_query="emergency procedures monitoring alerting operational runbook",
+            domain_instruction=(
+                f"{DEFI_GROUNDING}\n\n"
+                "Your focus: emergency procedures, monitoring, and the operational runbook. "
+                "Define the full emergency exit procedure: sequence of actions to close all "
+                "positions within N minutes, with fallback if liquidity is thin. "
+                "Specify monitoring stack (on-chain data sources, alerting thresholds), "
+                "key health metrics to track (TVL drift, slippage creep, wallet balance), "
+                "and a step-by-step operational runbook for both normal operations and incidents."
+            ),
+        ),
+    ],
+    rubric=DEFI_RUBRIC_DIMENSIONS,
+)
+
+
+ALL_TASKS = [AI_INCIDENT_RESPONSE, SOFTWARE_ARCHITECTURE, STRATEGIC_PLANNING, DEFI_STRATEGY_DESIGN]
 TASK_MAP = {t.id: t for t in ALL_TASKS}

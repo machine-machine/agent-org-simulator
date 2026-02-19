@@ -3,28 +3,37 @@
 BenchmarkSuite v2 — Main Entry Point
 
 Usage:
-  python run_suite.py                                      # all tasks, star only, 3 iters
-  python run_suite.py --tasks all --topologies all         # full suite
+  python run_suite.py                                             # all tasks, star only, 3 iters
+  python run_suite.py --tasks all --topologies all               # full suite
   python run_suite.py --tasks ai_incident_response --topologies star pipeline --iterations 4
   python run_suite.py --tasks software_architecture --topologies peer_review --eval-runs 3 --dry-run
-  python run_suite.py --resume results/                    # resume from saved intermediates
+  python run_suite.py --tasks defi_strategy_design --topologies hrm --iterations 3
+  python run_suite.py --tasks defi_strategy_design --topologies hrm --iterations 3 --max-loops 2
+  python run_suite.py --resume results/                          # resume from saved intermediates
 
 Outputs in: benchmark_v2/results/ (or --output)
 """
-import argparse, json, sys, time
+import argparse, functools, json, sys, time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))  # add parent to path
 
 from benchmark_v2.tasks import ALL_TASKS, TASK_MAP
-from benchmark_v2.topologies import TOPOLOGY_RUNNERS
+from benchmark_v2.tasks_enterprise import ENTERPRISE_TASKS, ENTERPRISE_TASK_MAP
+from benchmark_v2.tasks_execution import EXECUTION_TASKS, EXECUTION_TASK_MAP
+from benchmark_v2.topologies import TOPOLOGY_RUNNERS, run_hrm
 from benchmark_v2.learning_loop import learning_loop, run_sa_baseline, LearningResult
 from benchmark_v2.stats_report import generate_all_reports
+
+# Merge all task maps: base + enterprise + execution
+ALL_TASKS = list(ALL_TASKS) + ENTERPRISE_TASKS + EXECUTION_TASKS
+TASK_MAP = {**TASK_MAP, **ENTERPRISE_TASK_MAP, **EXECUTION_TASK_MAP}
 
 ALL_TOPOLOGIES = list(TOPOLOGY_RUNNERS.keys())
 
 
-def print_header(task_ids: list, topologies: list, iterations: int, eval_runs: int):
+def print_header(task_ids: list, topologies: list, iterations: int, eval_runs: int,
+                 max_loops: int = 3):
     print("\n" + "="*70)
     print("  MachineMachine BenchmarkSuite v2")
     print("="*70)
@@ -33,6 +42,8 @@ def print_header(task_ids: list, topologies: list, iterations: int, eval_runs: i
     print(f"  Iterations: {iterations} per condition")
     print(f"  Eval runs:  {eval_runs} (blind Anthropic haiku evaluator)")
     print(f"  Conditions: {len(task_ids) * len(topologies)} total")
+    if "hrm" in topologies:
+        print(f"  HRM loops:  {max_loops} (--max-loops)")
     print("="*70 + "\n")
 
 
@@ -52,18 +63,45 @@ def print_final_table(all_results: list):
     print("="*70)
 
 
+def _print_cost_summary(result: LearningResult):
+    """Print token usage and cost for a completed learning result."""
+    print(f"\n  💰 Cost Summary: {result.task_id} × {result.topology}")
+    total_cost = 0.0
+    total_tokens = 0
+    for rec in result.iterations:
+        tok = rec.token_summary or {}
+        cost = tok.get("cost_usd", 0.0)
+        tokens = tok.get("total_tokens", 0)
+        calls = tok.get("call_count", 0)
+        total_cost += cost
+        total_tokens += tokens
+        print(f"     Iter {rec.iteration}: {tokens:,} tokens ({calls} calls) → ${cost:.4f}  |  SA={rec.sa_score:.1f} MA={rec.ma_score:.1f} Δ={rec.delta:+.1f}")
+    if result.iterations:
+        print(f"     TOTAL: {total_tokens:,} tokens → ${total_cost:.4f} over {len(result.iterations)} iteration(s)")
+
+
 def main():
     parser = argparse.ArgumentParser(description="MachineMachine BenchmarkSuite v2")
     parser.add_argument("--tasks", nargs="+", default=["ai_incident_response"],
                         help=f"Task IDs or 'all'. Options: {[t.id for t in ALL_TASKS]}")
     parser.add_argument("--topologies", nargs="+", default=["star"],
                         help=f"Topologies or 'all'. Options: {ALL_TOPOLOGIES}")
-    parser.add_argument("--iterations", type=int, default=3, help="Max learning iterations per condition")
-    parser.add_argument("--eval-runs", type=int, default=3, help="Evaluator runs per condition (blind)")
-    parser.add_argument("--convergence", type=float, default=10.0, help="Delta threshold to stop early")
-    parser.add_argument("--output", type=str, default="benchmark_v2/results", help="Output directory")
-    parser.add_argument("--dry-run", action="store_true", help="Print plan without running")
-    parser.add_argument("--no-transfer", action="store_true", help="Skip cross-domain memory transfer")
+    parser.add_argument("--iterations", type=int, default=3,
+                        help="Max learning iterations per condition")
+    parser.add_argument("--eval-runs", type=int, default=3,
+                        help="Evaluator runs per condition (blind)")
+    parser.add_argument("--convergence", type=float, default=10.0,
+                        help="Delta threshold to stop early")
+    parser.add_argument("--output", type=str, default="benchmark_v2/results",
+                        help="Output directory")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Print plan without running")
+    parser.add_argument("--no-transfer", action="store_true",
+                        help="Skip cross-domain memory transfer")
+    parser.add_argument("--max-loops", type=int, default=3,
+                        help="Max recurrence loops for HRM topology (default: 3). "
+                             "Set to 1 to approximate star (no refinement). "
+                             "Has no effect on other topologies.")
     args = parser.parse_args()
 
     # Resolve tasks
@@ -86,10 +124,17 @@ def main():
             print(f"Unknown topologies: {unknown}. Available: {ALL_TOPOLOGIES}")
             sys.exit(1)
 
+    # Wire up HRM with user-specified max_loops via functools.partial.
+    # This lets learning_loop call run_fn(task, org_memory=...) uniformly
+    # while still honouring the --max-loops flag.
+    if args.max_loops != 3:
+        TOPOLOGY_RUNNERS["hrm"] = functools.partial(run_hrm, max_loops=args.max_loops)
+
     output_dir = Path(args.output)
     task_ids = [t.id for t in tasks]
 
-    print_header(task_ids, topologies, args.iterations, args.eval_runs)
+    print_header(task_ids, topologies, args.iterations, args.eval_runs,
+                 max_loops=args.max_loops)
 
     if args.dry_run:
         print("  [DRY RUN] Would run these conditions:")
@@ -137,6 +182,9 @@ def main():
                 shared_memory.update(result.org_memory)
 
             all_results.append(result)
+
+            # Print token/cost summary for this condition
+            _print_cost_summary(result)
 
     # Final reports
     print("\n\nGenerating reports...")
