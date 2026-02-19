@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MachineMachine — Agent Organization Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1729;
+    --navy-light: #162040;
+    --navy-mid: #1a2850;
+    --purple: #7C3AED;
+    --purple-light: #9D5FF0;
+    --purple-dark: #5b21b6;
+    --cyan: #00D9FF;
+    --cyan-dim: #00a8c8;
+    --green: #00FF88;
+    --orange: #FF6B35;
+    --yellow: #FFD700;
+    --red: #FF3366;
+    --white: #ffffff;
+    --text-dim: #8899aa;
+    --border: rgba(0,217,255,0.15);
+    --glow-cyan: 0 0 20px rgba(0,217,255,0.5);
+    --glow-purple: 0 0 20px rgba(124,58,237,0.5);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── HEADER ─────────────────────────────────────────────── */
+  .header {
+    background: linear-gradient(180deg, rgba(15,23,41,1) 0%, rgba(15,23,41,0.95) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    margin-right: auto;
+  }
+
+  .brand-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cyan);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .brand-subtitle {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+
+  .controls-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .task-buttons {
+    display: flex;
+    gap: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 3px;
+    border: 1px solid var(--border);
+  }
+
+  .task-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .task-btn:hover { color: var(--white); background: rgba(255,255,255,0.08); }
+  .task-btn.active { background: var(--purple); color: var(--white); }
+
+  .divider { width: 1px; height: 24px; background: var(--border); }
+
+  .btn {
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--cyan);
+    color: var(--navy);
+  }
+
+  .btn-primary:hover {
+    background: #00f0ff;
+    box-shadow: 0 0 20px rgba(0,217,255,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: var(--white);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+  .speed-group {
+    display: flex;
+    gap: 3px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px;
+  }
+
+  .speed-btn {
+    padding: 4px 9px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .speed-btn:hover { color: var(--white); }
+  .speed-btn.active { background: var(--purple); color: var(--white); }
+
+  /* ─── MAIN ────────────────────────────────────────────────── */
+  .main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    display: grid;
+    gap: 20px;
+  }
+
+  /* ─── SECTION CARD ────────────────────────────────────────── */
+  .card {
+    background: var(--navy-light);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.02);
+  }
+
+  .card-header h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    flex: 1;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    transition: all 0.3s;
+  }
+
+  .status-dot.active {
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .ci-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,217,255,0.08);
+    border: 1px solid rgba(0,217,255,0.2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .ci-label { color: var(--text-dim); }
+  .ci-value { color: var(--cyan); font-weight: 700; }
+
+  /* ─── CANVAS SECTION ──────────────────────────────────────── */
+  .canvas-wrap {
+    position: relative;
+    width: 100%;
+  }
+
+  #networkCanvas {
+    display: block;
+    width: 100%;
+    height: 420px;
+  }
+
+  .canvas-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+  }
+
+  /* ─── MIDDLE SECTION ──────────────────────────────────────── */
+  .mid-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 0;
+  }
+
+  /* Activity Log */
+  .log-pane {
+    border-right: 1px solid var(--border);
+  }
+
+  .log-body {
+    height: 240px;
+    overflow-y: auto;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    scrollbar-width: thin;
+    scrollbar-color: var(--purple) transparent;
+  }
+
+  .log-body::-webkit-scrollbar { width: 4px; }
+  .log-body::-webkit-scrollbar-track { background: transparent; }
+  .log-body::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 4px; }
+
+  .log-entry {
+    display: flex;
+    gap: 8px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .log-time { color: var(--text-dim); white-space: nowrap; flex-shrink: 0; }
+  .log-msg { color: #ccd6f6; flex: 1; }
+  .log-msg .from { color: var(--purple-light); }
+  .log-msg .to { color: var(--cyan); }
+  .log-msg .quote { color: #8899aa; font-style: italic; }
+
+  .log-placeholder {
+    color: var(--text-dim);
+    font-size: 12px;
+    text-align: center;
+    margin-top: 60px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Agent Progress */
+  .agents-pane { padding: 16px; }
+
+  .agents-pane h3 {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+
+  .agent-row {
+    margin-bottom: 12px;
+  }
+
+  .agent-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .agent-name-small {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .agent-pct {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--cyan);
+    font-weight: 600;
+  }
+
+  .progress-track {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  .progress-fill.cyan { background: var(--cyan); }
+  .progress-fill.purple { background: var(--purple); }
+  .progress-fill.green { background: var(--green); }
+
+  .quality-meter {
+    margin-top: 14px;
+    padding: 10px;
+    background: rgba(0,217,255,0.05);
+    border: 1px solid rgba(0,217,255,0.15);
+    border-radius: 8px;
+  }
+
+  .quality-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .quality-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .quality-value { font-size: 14px; font-weight: 700; color: var(--cyan); font-family: 'JetBrains Mono', monospace; }
+
+  .quality-track {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .quality-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple), var(--cyan));
+    border-radius: 6px;
+    width: 0%;
+    transition: width 0.8s ease;
+    box-shadow: 0 0 10px rgba(0,217,255,0.3);
+  }
+
+  /* ─── BENCHMARK SECTION ───────────────────────────────────── */
+  .bench-body {
+    padding: 20px;
+  }
+
+  .bench-cols {
+    display: grid;
+    grid-template-columns: 180px 1fr 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .bench-label-col {
+    background: rgba(255,255,255,0.02);
+    border-right: 1px solid var(--border);
+  }
+
+  .bench-col {
+    border-right: 1px solid var(--border);
+  }
+
+  .bench-col:last-child { border-right: none; }
+
+  .bench-col-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    background: rgba(255,255,255,0.02);
+    min-height: 58px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .bench-col-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .bench-col-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .bench-col-header.single .bench-col-title { color: #888; }
+  .bench-col-header.hybrid .bench-col-title { color: var(--orange); }
+  .bench-col-header.mm .bench-col-title { color: var(--cyan); }
+
+  .bench-label-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .bench-row {
+    display: contents;
+  }
+
+  .bench-metric-label {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 12px;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+  }
+
+  .bench-cell {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bench-bar-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bench-bar-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .bench-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    width: 0%;
+    transition: width 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .bench-bar-fill.single { background: #666; }
+  .bench-bar-fill.hybrid { background: var(--orange); }
+  .bench-bar-fill.mm { background: linear-gradient(90deg, var(--purple), var(--cyan)); box-shadow: 0 0 8px rgba(0,217,255,0.4); }
+
+  .bench-val {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .bench-val.single { color: #888; }
+  .bench-val.hybrid { color: var(--orange); }
+  .bench-val.mm { color: var(--cyan); }
+
+  .bench-icon {
+    font-size: 16px;
+  }
+
+  .bench-text-cell {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .bench-text-cell.single { color: #888; }
+  .bench-text-cell.hybrid { color: var(--orange); }
+  .bench-text-cell.mm { color: var(--cyan); }
+
+  /* ─── FOOTER ──────────────────────────────────────────────── */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-dim);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 10px;
+  }
+
+  .footer em { color: var(--white); font-style: italic; }
+  .footer a { color: var(--cyan); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ─── MISC ────────────────────────────────────────────────── */
+  .tag {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: rgba(0,217,255,0.12);
+    color: var(--cyan);
+    border: 1px solid rgba(0,217,255,0.25);
+  }
+
+  .task-info {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(124,58,237,0.05);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .task-info-icon { font-size: 20px; }
+  .task-info-title { font-size: 13px; font-weight: 600; color: var(--white); }
+  .task-info-desc { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .mid-grid { grid-template-columns: 1fr; }
+    .log-pane { border-right: none; border-bottom: 1px solid var(--border); }
+    .bench-cols { grid-template-columns: 1fr; }
+    .bench-label-col, .bench-col { border-right: none; border-bottom: 1px solid var(--border); }
+    #networkCanvas { height: 300px; }
+  }
+
+  @media (max-width: 600px) {
+    .header-inner { gap: 12px; }
+    .task-btn { font-size: 10px; padding: 4px 7px; }
+    .bench-cols { display: flex; flex-direction: column; }
+  }
+
+  /* Sim running glow */
+  .card.running {
+    border-color: rgba(0,217,255,0.3);
+    box-shadow: 0 0 30px rgba(0,217,255,0.08);
+  }
+
+  .run-label {
+    font-size: 10px;
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-name">MachineMachine</span>
+      <span class="brand-subtitle">Agent Organization Simulator</span>
+    </div>
+
+    <div class="controls-bar">
+      <!-- Task Selector -->
+      <div class="task-buttons">
+        <button class="task-btn active" data-task="0">🏛 Governance</button>
+        <button class="task-btn" data-task="1">⚡ Failure Recovery</button>
+        <button class="task-btn" data-task="2">🚀 Scale Test</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Run / Pause / Reset -->
+      <button class="btn btn-primary" id="runBtn">▶ Run Simulation</button>
+      <button class="btn btn-secondary" id="pauseBtn" disabled>⏸ Pause</button>
+      <button class="btn btn-secondary" id="resetBtn">↺ Reset</button>
+
+      <div class="divider"></div>
+
+      <!-- Speed -->
+      <div class="speed-group">
+        <button class="speed-btn active" data-speed="1">1×</button>
+        <button class="speed-btn" data-speed="2">2×</button>
+        <button class="speed-btn" data-speed="4">4×</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SECTION 1: Network Visualization -->
+  <div class="card" id="networkCard">
+    <div class="card-header">
+      <div class="status-dot" id="statusDot"></div>
+      <h2>Live Agent Network</h2>
+      <span class="run-label" id="runLabel" style="display:none">● SIMULATING</span>
+      <div class="ci-badge">
+        <span class="ci-label">CI Score</span>
+        <span class="ci-value" id="ciScore">0</span>
+      </div>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="networkCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Task Simulation Panel -->
+  <div class="card" id="simCard">
+    <div class="card-header">
+      <div class="status-dot" id="simDot"></div>
+      <h2>Task Simulation</h2>
+      <span class="tag" id="taskTag">IDLE</span>
+    </div>
+    <div class="task-info" id="taskInfo">
+      <span class="task-info-icon">🏛</span>
+      <div>
+        <div class="task-info-title">Design Governance Protocol</div>
+        <div class="task-info-desc">Agents collaborate to create a distributed decision-making framework</div>
+      </div>
+    </div>
+    <div class="mid-grid">
+      <!-- Activity Log -->
+      <div class="log-pane">
+        <div class="card-header" style="padding:10px 16px;">
+          <h2>Activity Log</h2>
+        </div>
+        <div class="log-body" id="logBody">
+          <div class="log-placeholder">▶ Run a simulation to see agent activity...</div>
+        </div>
+      </div>
+
+      <!-- Agent Progress -->
+      <div class="agents-pane">
+        <h3>Agent Progress</h3>
+        <div id="agentProgressList">
+          <div class="agent-row">
+            <div class="agent-row-header">
+              <span class="agent-name-small">🏗️ Systems Architect</span>
+              <span class="agent-pct" id="pct-0">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill cyan" id="bar-0"></div></div>
+          </div>
+          <div class="agent-row">
+            <div class="agent-row-header">
+              <span class="agent-name-small">🤝 Coord. Specialist</span>
+              <span class="agent-pct" id="pct-1">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill purple" id="bar-1"></div></div>
+          </div>
+          <div class="agent-row">
+            <div class="agent-row-header">
+              <span class="agent-name-small">⚖️ Gov. Designer</span>
+              <span class="agent-pct" id="pct-2">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill cyan" id="bar-2"></div></div>
+          </div>
+          <div class="agent-row">
+            <div class="agent-row-header">
+              <span class="agent-name-small">🧠 Emergence Eng.</span>
+              <span class="agent-pct" id="pct-3">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill purple" id="bar-3"></div></div>
+          </div>
+          <div class="agent-row">
+            <div class="agent-row-header">
+              <span class="agent-name-small">📊 Network Analyst</span>
+              <span class="agent-pct" id="pct-4">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill cyan" id="bar-4"></div></div>
+          </div>
+        </div>
+
+        <div class="quality-meter">
+          <div class="quality-header">
+            <span class="quality-label">Output Quality</span>
+            <span class="quality-value" id="qualityVal">0%</span>
+          </div>
+          <div class="quality-track">
+            <div class="quality-fill" id="qualityFill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Benchmarks -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Benchmark Comparison</h2>
+      <span class="tag">LIVE METRICS</span>
+    </div>
+    <div class="bench-body">
+      <div class="bench-cols">
+        <!-- Header row -->
+        <div class="bench-label-col">
+          <div class="bench-label-header">Metric</div>
+          <div class="bench-metric-label">Task Completion</div>
+          <div class="bench-metric-label">Time to Complete</div>
+          <div class="bench-metric-label">Knowledge Retained</div>
+          <div class="bench-metric-label">Scales to 10× Load</div>
+          <div class="bench-metric-label">Improves Over Time</div>
+        </div>
+
+        <!-- Single Agent -->
+        <div class="bench-col">
+          <div class="bench-col-header single">
+            <div class="bench-col-title">Single Agent</div>
+            <div class="bench-col-sub">Baseline</div>
+          </div>
+          <div class="bench-cell">
+            <div class="bench-bar-wrap">
+              <div class="bench-bar-track"><div class="bench-bar-fill single" id="b-s-0" data-target="17"></div></div>
+              <span class="bench-val single" id="v-s-0">—</span>
+            </div>
+          </div>
+          <div class="bench-cell">
+            <div class="bench-bar-wrap">
+              <div class="bench-bar-track"><div class="bench-bar-fill single" id="b-s-1" data-target="52"></div></div>
+              <span class="bench-val single" id="v-s-1">—</span>
+            </div>
+          </div>
+          <div class="bench-cell">
+            <div class="bench-bar-wrap">
+              <div class="bench-bar-track"><div class="bench-bar-fill single" id="b-s-2" data-target="0"></div></div>
+              <span class="bench-val single" id="v-s-2">—</span>
+            </div>
+          </div>
+          <div class="bench-cell"><span class="bench-icon">✗</span></div>
+          <div class="bench-cell"><span class="bench-text-cell single">✗ None</span></div>
+        </div>
+
+        <!-- Hybrid -->
+        <div class="bench-col">
+          <div class="bench-col-header hybrid">
+            <div class="bench-col-title">Human-AI Hybrid</div>
+            <div class="bench-col-sub">10-person team</div>
+          </div>
+          <div class="bench-cell">
+            <div class="bench-bar-wrap">
+              <div class="bench-bar-track"><div class="bench-bar-fill hybrid" id="b-h-0" data-target="59"></div></div>
+              <span class="bench-val hybrid" id="v-h-0">—</span>
+            </div>
+          </div>
+          <div class="bench-cell">
+            <div class="bench-bar-wrap">
+              <div class="bench-bar-track"><div class="bench-bar-fill hybrid" id="b-h-1" data-target="100"></div></div>
+              <span class="bench-val hybrid" id="v-h-1">—</span>
+            </div>
+          </div>
+          <div class="bench-cell">
+            <div class="bench-bar-wrap">
+              <div class="bench-bar-track"><div class="bench-bar-fill hybrid" id="b-h-2" data-target="23"></div></div>
+              <span class="bench-val hybrid" id="v-h-2">—</span>
+            </div>
+          </div>
+          <div class="bench-cell"><span class="bench-icon">✗</span></div>
+          <div class="bench-cell"><span class="bench-text-cell hybrid">↗ Slow</span></div>
+        </div>
+
+        <!-- MachineMachine -->
+        <div class="bench-col">
+          <div class="bench-col-header mm">
+            <div class="bench-col-title">MachineMachine</div>
+            <div class="bench-col-sub">AI Organization</div>
+          </div>
+          <div class="bench-cell">
+            <div class="bench-bar-wrap">
+              <div class="bench-bar-track"><div class="bench-bar-fill mm" id="b-m-0" data-target="100"></div></div>
+              <span class="bench-val mm" id="v-m-0">—</span>
+            </div>
+          </div>
+          <div class="bench-cell">
+            <div class="bench-bar-wrap">
+              <div class="bench-bar-track"><div class="bench-bar-fill mm" id="b-m-1" data-target="16"></div></div>
+              <span class="bench-val mm" id="v-m-1">—</span>
+            </div>
+          </div>
+          <div class="bench-cell">
+            <div class="bench-bar-wrap">
+              <div class="bench-bar-track"><div class="bench-bar-fill mm" id="b-m-2" data-target="94"></div></div>
+              <span class="bench-val mm" id="v-m-2">—</span>
+            </div>
+          </div>
+          <div class="bench-cell" style="color: var(--cyan); font-size:16px;">✓</div>
+          <div class="bench-cell"><span class="bench-text-cell mm">✓ Continuous</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <em>"Coordination exists. Organizational intelligence doesn't — until now."</em>
+  &nbsp;—&nbsp;<a href="https://pitch.machinemachine.ai" target="_blank">pitch.machinemachine.ai</a>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// SIMULATION ENGINE
+// ═══════════════════════════════════════════════════════════════════
+
+const AGENTS = [
+  { id: 0, emoji: '🏗️', name: 'Systems Architect',      short: 'Sys Arch',   color: '#00D9FF' },
+  { id: 1, emoji: '🤝', name: 'Coordination Specialist', short: 'Coord',      color: '#7C3AED' },
+  { id: 2, emoji: '⚖️', name: 'Governance Designer',    short: 'Gov',        color: '#00D9FF' },
+  { id: 3, emoji: '🧠', name: 'Emergence Engineer',      short: 'Emerge',     color: '#9D5FF0' },
+  { id: 4, emoji: '📊', name: 'Network Analyst',         short: 'Net',        color: '#00D9FF' },
+];
+
+const TASKS = [
+  {
+    id: 0,
+    emoji: '🏛',
+    name: 'Design Governance Protocol',
+    desc: 'Agents collaborate to create a distributed decision-making framework',
+    tag: 'GOVERNANCE',
+    duration: 30000,
+    script: [
+      { t: 0.5,  from: 1, to: 0, type: 'blue',   msg: 'Initiating governance protocol design. Requesting systems architecture review.' },
+      { t: 1.5,  from: 0, to: 2, type: 'purple',  msg: 'Architecture baseline defined. Starting governance layer mapping.' },
+      { t: 2.5,  from: 4, to: 3, type: 'blue',    msg: 'Network topology analysis complete. 5-node mesh optimal for consensus.' },
+      { t: 3.5,  from: 2, to: 1, type: 'purple',  msg: 'Governance layer 1 designed. Consensus threshold: 3/5 agents.' },
+      { t: 4.5,  from: 3, to: 2, type: 'yellow',  msg: 'Convergence detected on governance layer 2. Suggesting protocol amendment.' },
+      { t: 5.5,  from: 1, to: 4, type: 'blue',    msg: 'Coordination protocol v0.3 ready. Requesting network validation.' },
+      { t: 6.5,  from: 4, to: 0, type: 'purple',  msg: 'Network simulation run: 10,000 consensus cycles. Success rate: 99.7%.' },
+      { t: 7.5,  from: 0, to: 3, type: 'blue',    msg: 'Architecture hardened. Distributed lock-free consensus mechanism approved.' },
+      { t: 8.5,  from: 3, to: 1, type: 'yellow',  msg: 'Emergent behavior detected: self-optimizing quorum selection. Integrating.' },
+      { t: 9.5,  from: 2, to: 4, type: 'purple',  msg: 'Governance layer 3 finalized. Exception handling protocols encoded.' },
+      { t: 11,   from: 1, to: 2, type: 'yellow',  msg: 'All agents converging. Final protocol synthesis in progress.' },
+      { t: 12.5, from: 4, to: 1, type: 'blue',    msg: 'Network benchmark: 12ms avg consensus latency. Exceeds target by 4×.' },
+      { t: 14,   from: 0, to: 1, type: 'green',   msg: 'DELIVERABLE: Governance Protocol v1.0 — 94% quality score. Signing off.' },
+      { t: 15.5, from: 3, to: 4, type: 'purple',  msg: 'Continuous improvement module activated. Will self-optimize post-deploy.' },
+      { t: 17,   from: 2, to: 3, type: 'blue',    msg: 'Formal verification complete. Protocol provably correct under BFT model.' },
+      { t: 18.5, from: 1, to: 0, type: 'yellow',  msg: 'Org memory updated. All agents aligned on final spec.' },
+      { t: 20,   from: 4, to: 2, type: 'green',   msg: 'DELIVERABLE: Network report — throughput 580% above single-agent baseline.' },
+      { t: 22,   from: 0, to: 4, type: 'purple',  msg: 'System architecture docs auto-generated and version-controlled.' },
+      { t: 24,   from: 3, to: 1, type: 'blue',    msg: 'Emergent protocol optimizations encoded into org memory for future tasks.' },
+      { t: 26,   from: 1, to: 3, type: 'green',   msg: 'TASK COMPLETE: Governance Protocol deployed. CI Score: 94/100.' },
+    ],
+    agentTargets: [88, 92, 97, 85, 90],
+    failNode: null,
+  },
+  {
+    id: 1,
+    emoji: '⚡',
+    name: 'Detect & Recover from Agent Failure',
+    desc: 'One agent goes offline — org self-heals and continues without interruption',
+    tag: 'RESILIENCE',
+    duration: 30000,
+    script: [
+      { t: 0.5,  from: 1, to: 0, type: 'blue',   msg: 'All agents online. Initializing failure detection monitoring.' },
+      { t: 1.5,  from: 4, to: 3, type: 'blue',   msg: 'Network health nominal. Heartbeat interval: 500ms.' },
+      { t: 2.5,  from: 0, to: 2, type: 'purple', msg: 'Distributing task partitions. 5-way parallel execution active.' },
+      { t: 4,    from: 2, to: 1, type: 'purple', msg: 'Governance layer active. Consensus verified across all nodes.' },
+      { t: 5.5,  from: 3, to: 0, type: 'blue',   msg: 'Emergence patterns nominal. Collaboration efficiency: 97%.' },
+      { t: 7,    from: 1, to: 4, type: 'yellow', msg: '⚠️ ANOMALY: Heartbeat missed from Governance Designer. Monitoring...' },
+      { t: 8,    from: 4, to: 1, type: 'yellow', msg: '🔴 ALERT: Governance Designer OFFLINE. Initiating recovery protocol.' },
+      { t: 8.5,  from: 1, to: 0, type: 'purple', msg: 'Redistributing Governance Designer workload. Systems Architect: absorb 40%.' },
+      { t: 9,    from: 1, to: 3, type: 'purple', msg: 'Emergence Engineer: absorb 35% of governance workload.' },
+      { t: 9.5,  from: 1, to: 4, type: 'purple', msg: 'Network Analyst: absorb 25%. Topology reconfigured. Edges rerouted.' },
+      { t: 10.5, from: 0, to: 3, type: 'blue',   msg: 'Workload absorption complete. Task progress preserved. No data lost.' },
+      { t: 11.5, from: 3, to: 4, type: 'yellow', msg: 'Performance holding at 78% of peak. Acceptable degradation.' },
+      { t: 13,   from: 4, to: 0, type: 'blue',   msg: 'Root cause analysis: memory exhaustion in governance subsystem.' },
+      { t: 14.5, from: 1, to: 2, type: 'purple', msg: '🔧 Reconstructing Governance Designer with patched memory allocation.' },
+      { t: 16,   from: 0, to: 2, type: 'blue',   msg: 'Knowledge transfer: uploading org memory snapshot to recovered node.' },
+      { t: 17.5, from: 2, to: 1, type: 'green',  msg: '✅ Governance Designer ONLINE. Memory patched. Rejoining org network.' },
+      { t: 18.5, from: 1, to: 4, type: 'yellow', msg: 'Reintegrating recovered agent. Load balancing in progress.' },
+      { t: 20,   from: 3, to: 2, type: 'blue',   msg: 'Handing back absorbed workload. Governance Designer resuming duties.' },
+      { t: 21.5, from: 4, to: 1, type: 'blue',   msg: 'Full performance restored: 99.2% of baseline. Downtime: 13 seconds.' },
+      { t: 23,   from: 2, to: 3, type: 'green',  msg: 'DELIVERABLE: Failure recovery playbook encoded into org memory.' },
+      { t: 25,   from: 1, to: 0, type: 'green',  msg: 'TASK COMPLETE: Zero data loss. Recovery in 13s. Human team: ~45 min.' },
+    ],
+    agentTargets: [91, 96, 75, 88, 85],
+    failNode: 2,
+    failAt: 8,
+    recoverAt: 17.5,
+  },
+  {
+    id: 2,
+    emoji: '🚀',
+    name: 'Optimize for 100 Concurrent Tasks',
+    desc: 'Dynamic resource allocation challenge — scale to 10× load with zero degradation',
+    tag: 'SCALE TEST',
+    duration: 30000,
+    script: [
+      { t: 0.5,  from: 4, to: 1, type: 'blue',   msg: 'Scale test initiated. Current load: 10 tasks. Target: 100 tasks.' },
+      { t: 1.5,  from: 1, to: 0, type: 'purple', msg: 'Requesting architecture assessment for 10× scale-up.' },
+      { t: 2.5,  from: 0, to: 4, type: 'blue',   msg: 'Bottleneck identified: coordination layer. Proposing parallel pipelines.' },
+      { t: 3.5,  from: 3, to: 2, type: 'yellow', msg: 'Emergence pattern: tasks cluster into 7 natural groups. Exploit this.' },
+      { t: 4.5,  from: 2, to: 1, type: 'purple', msg: 'Governance updated: dynamic priority queuing protocol activated.' },
+      { t: 5.5,  from: 1, to: 3, type: 'blue',   msg: 'Parallel coordination channels: 5→ 20. Scaling coordination mesh.' },
+      { t: 6.5,  from: 4, to: 0, type: 'yellow', msg: 'Load: 30 tasks. Throughput: 310% of baseline. Ahead of schedule.' },
+      { t: 7.5,  from: 0, to: 2, type: 'purple', msg: 'Architecture upgraded: lock-free queue depth doubled to 10K.' },
+      { t: 8.5,  from: 3, to: 1, type: 'blue',   msg: 'Self-organizing task clustering active. Coordination overhead: -67%.' },
+      { t: 9.5,  from: 2, to: 4, type: 'yellow', msg: 'Load: 50 tasks. All agents green. No degradation detected.' },
+      { t: 11,   from: 1, to: 4, type: 'purple', msg: 'Predictive load balancing engaged. Routing tasks before bottlenecks form.' },
+      { t: 12.5, from: 4, to: 3, type: 'blue',   msg: 'Load: 75 tasks. Latency stable. Org adapting in real-time.' },
+      { t: 14,   from: 3, to: 0, type: 'yellow', msg: 'Emergence: agents spontaneously specializing for current load profile.' },
+      { t: 15.5, from: 0, to: 1, type: 'purple', msg: 'Specialization acknowledged. Optimizing inter-agent routing accordingly.' },
+      { t: 17,   from: 1, to: 2, type: 'yellow', msg: '🎯 PEAK LOAD: 100 concurrent tasks active. Monitoring all channels.' },
+      { t: 18.5, from: 2, to: 3, type: 'blue',   msg: 'Governance holding. Zero policy violations at 100 tasks.' },
+      { t: 20,   from: 4, to: 1, type: 'blue',   msg: 'Throughput: 580% of single-agent baseline. Quality maintained at 91%.' },
+      { t: 21.5, from: 3, to: 4, type: 'yellow', msg: 'Continuous optimization loop: knowledge from this run encoding to memory.' },
+      { t: 23,   from: 1, to: 3, type: 'green',  msg: 'DELIVERABLE: Scale playbook — org now handles 100× tasks natively.' },
+      { t: 24.5, from: 0, to: 4, type: 'purple', msg: 'Architecture patterns promoted to org-wide standard. Future-proofed.' },
+      { t: 26,   from: 1, to: 0, type: 'green',  msg: 'TASK COMPLETE: 100 tasks at 580% baseline. No human intervention needed.' },
+    ],
+    agentTargets: [95, 98, 90, 93, 97],
+    failNode: null,
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// CANVAS RENDERER
+// ═══════════════════════════════════════════════════════════════════
+
+const canvas = document.getElementById('networkCanvas');
+const ctx = canvas.getContext('2d');
+
+let W, H, cx, cy, radius;
+let nodePositions = [];
+let nodeStates = []; // 'idle' | 'thinking' | 'communicating' | 'delivering'
+let nodeGlow = [];   // 0..1
+let nodeOffline = []; // bool
+let nodeReconstructed = []; // bool
+let packets = [];
+let edgeFreq = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
+
+function resizeCanvas() {
+  const wrap = canvas.parentElement;
+  W = wrap.clientWidth;
+  H = canvas.getBoundingClientRect().height || 420;
+  canvas.width = W * devicePixelRatio;
+  canvas.height = H * devicePixelRatio;
+  canvas.style.height = H + 'px';
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  cx = W / 2;
+  cy = H / 2;
+  radius = Math.min(W, H) * 0.32;
+  computeNodePositions();
+}
+
+function computeNodePositions() {
+  nodePositions = AGENTS.map((_, i) => {
+    const angle = (2 * Math.PI * i / 5) - Math.PI / 2;
+    return {
+      x: cx + radius * Math.cos(angle),
+      y: cy + radius * Math.sin(angle),
+    };
+  });
+}
+
+function initNodeStates() {
+  nodeStates = AGENTS.map(() => 'idle');
+  nodeGlow = AGENTS.map(() => 0);
+  nodeOffline = AGENTS.map(() => false);
+  nodeReconstructed = AGENTS.map(() => false);
+  packets = [];
+  edgeFreq = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
+}
+
+const PACKET_COLORS = {
+  blue:   '#3B82F6',
+  purple: '#7C3AED',
+  yellow: '#FFD700',
+  green:  '#00FF88',
+};
+
+function spawnPacket(from, to, type) {
+  packets.push({
+    from, to, type,
+    progress: 0,
+    speed: 0.012,
+    color: PACKET_COLORS[type] || '#ffffff',
+    size: type === 'green' ? 6 : 4,
+    trail: [],
+  });
+  edgeFreq[from][to] = Math.min(edgeFreq[from][to] + 1, 8);
+  edgeFreq[to][from] = Math.min(edgeFreq[to][from] + 1, 8);
+  nodeStates[from] = 'communicating';
+  nodeStates[to] = 'thinking';
+  nodeGlow[from] = 1;
+  nodeGlow[to] = 0.7;
+}
+
+function getNodeColor(i) {
+  if (nodeOffline[i]) return '#FF3366';
+  if (nodeReconstructed[i]) return '#00FF88';
+  const state = nodeStates[i];
+  if (state === 'delivering') return '#00FF88';
+  if (state === 'communicating') return '#00D9FF';
+  if (state === 'thinking') return '#9D5FF0';
+  return '#4a6080';
+}
+
+function drawScene(simTime, simActive) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Background grid
+  ctx.strokeStyle = 'rgba(0,217,255,0.04)';
+  ctx.lineWidth = 0.5;
+  const step = 40;
+  for (let x = 0; x < W; x += step) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += step) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Edges
+  for (let i = 0; i < 5; i++) {
+    for (let j = i + 1; j < 5; j++) {
+      const freq = (edgeFreq[i][j] + edgeFreq[j][i]) / 2;
+      const alpha = simActive ? 0.12 + freq * 0.06 : 0.06;
+      const width = simActive ? 0.5 + freq * 0.3 : 0.5;
+      const p1 = nodePositions[i];
+      const p2 = nodePositions[j];
+
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = `rgba(0,217,255,${alpha})`;
+      ctx.lineWidth = width;
+      ctx.stroke();
+    }
+  }
+
+  // Packets
+  packets = packets.filter(p => p.progress <= 1.05);
+  for (const p of packets) {
+    const from = nodePositions[p.from];
+    const to = nodePositions[p.to];
+    const x = from.x + (to.x - from.x) * p.progress;
+    const y = from.y + (to.y - from.y) * p.progress;
+
+    // Trail
+    p.trail.push({ x, y, a: 0.6 });
+    if (p.trail.length > 8) p.trail.shift();
+    for (let ti = 0; ti < p.trail.length; ti++) {
+      const tp = p.trail[ti];
+      const ta = (ti / p.trail.length) * 0.4;
+      ctx.beginPath();
+      ctx.arc(tp.x, tp.y, p.size * 0.5 * (ti / p.trail.length), 0, Math.PI * 2);
+      ctx.fillStyle = p.color.replace(')', `,${ta})`).replace('rgb', 'rgba').replace('#', 'rgba(').replace('))', ')');
+      // simpler:
+      ctx.globalAlpha = ta;
+      ctx.fillStyle = p.color;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // Glow
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, p.size * 3);
+    grd.addColorStop(0, p.color + 'aa');
+    grd.addColorStop(1, p.color + '00');
+    ctx.beginPath();
+    ctx.arc(x, y, p.size * 3, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+
+    // Dot
+    ctx.beginPath();
+    ctx.arc(x, y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 12;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    p.progress += p.speed * simSpeed;
+  }
+
+  // Center CI ring
+  const ciVal = parseInt(document.getElementById('ciScore').textContent) || 0;
+  const ciAngle = (ciVal / 100) * Math.PI * 2;
+  const innerR = Math.min(radius * 0.35, 55);
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(0,217,255,0.08)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  if (simActive && ciVal > 0) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerR, -Math.PI / 2, -Math.PI / 2 + ciAngle);
+    ctx.strokeStyle = '#00D9FF';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#00D9FF';
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  // Center text
+  ctx.fillStyle = ciVal > 0 ? '#00D9FF' : 'rgba(255,255,255,0.2)';
+  ctx.font = `bold ${Math.floor(innerR * 0.55)}px JetBrains Mono, monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(ciVal > 0 ? ciVal : 'CI', cx, cy - 5);
+  ctx.font = `500 10px Inter, sans-serif`;
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.fillText('SCORE', cx, cy + Math.floor(innerR * 0.38));
+
+  // Nodes
+  const t = simTime || 0;
+  const pulse = Math.sin(t * 0.003) * 0.08 + 1;
+
+  for (let i = 0; i < 5; i++) {
+    const pos = nodePositions[i];
+    const col = getNodeColor(i);
+    const glowAmt = nodeGlow[i];
+    const pulsed = nodeOffline[i] ? 1 : pulse;
+    const r = 32 * pulsed;
+
+    if (glowAmt > 0.01 && !nodeOffline[i]) {
+      const grd = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, r * 2.5);
+      grd.addColorStop(0, col + '44');
+      grd.addColorStop(1, col + '00');
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, r * 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.globalAlpha = glowAmt;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // Node circle
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
+    const bg = ctx.createRadialGradient(pos.x - 4, pos.y - 4, 0, pos.x, pos.y, r);
+    if (nodeOffline[i]) {
+      bg.addColorStop(0, '#3a1020');
+      bg.addColorStop(1, '#1a0510');
+    } else if (nodeReconstructed[i]) {
+      bg.addColorStop(0, '#0a2a1a');
+      bg.addColorStop(1, '#050f0a');
+    } else {
+      bg.addColorStop(0, '#1e3060');
+      bg.addColorStop(1, '#0d1a35');
+    }
+    ctx.fillStyle = bg;
+    ctx.fill();
+
+    // Border
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
+    ctx.strokeStyle = col;
+    ctx.lineWidth = nodeOffline[i] ? 2 : (glowAmt > 0.3 ? 2.5 : 1.5);
+    ctx.shadowColor = col;
+    ctx.shadowBlur = glowAmt * 20;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Emoji
+    ctx.font = `${Math.floor(r * 0.65)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.globalAlpha = nodeOffline[i] ? 0.3 : 1;
+    ctx.fillText(AGENTS[i].emoji, pos.x, pos.y - 3);
+    ctx.globalAlpha = 1;
+
+    // Name label
+    ctx.font = `500 10px Inter, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = nodeOffline[i] ? '#FF3366' : col;
+    const label = nodeOffline[i] ? 'OFFLINE' : AGENTS[i].short;
+    ctx.fillText(label, pos.x, pos.y + r + 6);
+
+    // Glow decay
+    if (nodeGlow[i] > 0) nodeGlow[i] = Math.max(0, nodeGlow[i] - 0.008);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SIMULATION STATE
+// ═══════════════════════════════════════════════════════════════════
+
+let simActive = false;
+let simPaused = false;
+let simSpeed = 1;
+let simTime = 0;
+let simStartWall = null;
+let simPauseTime = 0;
+let currentTask = TASKS[0];
+let scriptIndex = 0;
+let ciTarget = 0;
+let ciCurrent = 0;
+let agentProgress = [0, 0, 0, 0, 0];
+let qualityProgress = 0;
+let rafId = null;
+let simDuration = 30000;
+
+function resetSim() {
+  simActive = false;
+  simPaused = false;
+  simTime = 0;
+  simStartWall = null;
+  scriptIndex = 0;
+  ciTarget = 0;
+  ciCurrent = 0;
+  agentProgress = [0, 0, 0, 0, 0];
+  qualityProgress = 0;
+  initNodeStates();
+  updateUI();
+  clearLog();
+  updateBars(false);
+  document.getElementById('ciScore').textContent = '0';
+  document.getElementById('qualityVal').textContent = '0%';
+  document.getElementById('qualityFill').style.width = '0%';
+  for (let i = 0; i < 5; i++) {
+    document.getElementById(`bar-${i}`).style.width = '0%';
+    document.getElementById(`pct-${i}`).textContent = '0%';
+  }
+}
+
+function startSim() {
+  if (simActive && !simPaused) return;
+  if (simPaused) {
+    simPaused = false;
+    simStartWall = performance.now() - simTime / simSpeed;
+    updateUI();
+    return;
+  }
+  resetSim();
+  simActive = true;
+  simStartWall = performance.now();
+  updateUI();
+  document.getElementById('statusDot').classList.add('active');
+  document.getElementById('simDot').classList.add('active');
+  document.getElementById('runLabel').style.display = '';
+  document.getElementById('networkCard').classList.add('running');
+  document.getElementById('simCard').classList.add('running');
+  document.getElementById('taskTag').textContent = currentTask.tag;
+  ciTarget = 94;
+  setTimeout(animateBars, 2000);
+}
+
+function pauseSim() {
+  if (!simActive) return;
+  simPaused = !simPaused;
+  if (simPaused) {
+    simTime = (performance.now() - simStartWall) * simSpeed;
+  } else {
+    simStartWall = performance.now() - simTime / simSpeed;
+  }
+  updateUI();
+}
+
+function stopSim() {
+  simActive = false;
+  simPaused = false;
+  document.getElementById('statusDot').classList.remove('active');
+  document.getElementById('simDot').classList.remove('active');
+  document.getElementById('runLabel').style.display = 'none';
+  document.getElementById('networkCard').classList.remove('running');
+  document.getElementById('simCard').classList.remove('running');
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById('runBtn').disabled = simActive && !simPaused;
+  document.getElementById('runBtn').textContent = simPaused ? '▶ Resume' : '▶ Run Simulation';
+  document.getElementById('pauseBtn').disabled = !simActive;
+  document.getElementById('pauseBtn').textContent = simPaused ? '▶ Resume' : '⏸ Pause';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════════════════════════════════
+
+function clearLog() {
+  document.getElementById('logBody').innerHTML = '<div class="log-placeholder">▶ Run a simulation to see agent activity...</div>';
+}
+
+let logStart = null;
+
+function addLog(from, to, msg) {
+  const now = new Date();
+  const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const body = document.getElementById('logBody');
+  const placeholder = body.querySelector('.log-placeholder');
+  if (placeholder) placeholder.remove();
+
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  div.innerHTML = `<span class="log-time">[${ts}]</span><span class="log-msg"><span class="from">${AGENTS[from].emoji} ${AGENTS[from].name}</span> → <span class="to">${AGENTS[to].emoji} ${AGENTS[to].name}</span>: <span class="quote">"${msg}"</span></span>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BENCHMARK BARS
+// ═══════════════════════════════════════════════════════════════════
+
+const BENCH_VALUES = {
+  's': ['100%', '4.2h', '0%'],
+  'h': ['340%', '8.1h', '23%'],
+  'm': ['580%', '1.3h', '94%'],
+};
+
+const BENCH_TARGETS = {
+  's': [17, 52, 0],
+  'h': [59, 100, 23],
+  'm': [100, 16, 94],
+};
+
+function animateBars() {
+  const duration = 1500;
+  const start = performance.now();
+  function step(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+
+    ['s', 'h', 'm'].forEach(t => {
+      for (let i = 0; i < 3; i++) {
+        const bar = document.getElementById(`b-${t}-${i}`);
+        const val = document.getElementById(`v-${t}-${i}`);
+        if (bar) {
+          const target = BENCH_TARGETS[t][i];
+          bar.style.width = (target * ease) + '%';
+        }
+        if (val && progress > 0.5) {
+          val.textContent = BENCH_VALUES[t][i];
+        }
+      }
+    });
+
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function updateBars(active) {
+  if (!active) {
+    ['s', 'h', 'm'].forEach(t => {
+      for (let i = 0; i < 3; i++) {
+        const bar = document.getElementById(`b-${t}-${i}`);
+        const val = document.getElementById(`v-${t}-${i}`);
+        if (bar) bar.style.width = '0%';
+        if (val) val.textContent = '—';
+      }
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MAIN LOOP
+// ═══════════════════════════════════════════════════════════════════
+
+let lastFrameTime = 0;
+
+function loop(now) {
+  rafId = requestAnimationFrame(loop);
+
+  if (simActive && !simPaused) {
+    simTime = (now - simStartWall) * simSpeed;
+
+    // Process script events
+    const task = currentTask;
+    while (scriptIndex < task.script.length) {
+      const event = task.script[scriptIndex];
+      if (simTime >= event.t * 1000) {
+        spawnPacket(event.from, event.to, event.type);
+        addLog(event.from, event.to, event.msg);
+        scriptIndex++;
+
+        // Update agent progress
+        const frac = scriptIndex / task.script.length;
+        for (let i = 0; i < 5; i++) {
+          const targetPct = task.agentTargets[i];
+          agentProgress[i] = Math.min(targetPct, Math.round(frac * targetPct * 1.3));
+          document.getElementById(`bar-${i}`).style.width = agentProgress[i] + '%';
+          document.getElementById(`pct-${i}`).textContent = agentProgress[i] + '%';
+        }
+
+        // Quality
+        qualityProgress = Math.min(95, Math.round(frac * 100));
+        document.getElementById('qualityFill').style.width = qualityProgress + '%';
+        document.getElementById('qualityVal').textContent = qualityProgress + '%';
+
+        // CI
+        ciTarget = Math.min(94, Math.round(frac * 100));
+      } else {
+        break;
+      }
+    }
+
+    // Handle node failure/recovery
+    if (task.failNode !== null) {
+      const failMs = (task.failAt || 8) * 1000;
+      const recoverMs = (task.recoverAt || 17.5) * 1000;
+      if (simTime >= failMs && simTime < recoverMs) {
+        nodeOffline[task.failNode] = true;
+        nodeReconstructed[task.failNode] = false;
+      } else if (simTime >= recoverMs) {
+        nodeOffline[task.failNode] = false;
+        nodeReconstructed[task.failNode] = true;
+      } else {
+        nodeOffline[task.failNode] = false;
+        nodeReconstructed[task.failNode] = false;
+      }
+    }
+
+    // Animate CI score
+    ciCurrent += (ciTarget - ciCurrent) * 0.03;
+    document.getElementById('ciScore').textContent = Math.round(ciCurrent);
+
+    // End
+    if (simTime >= task.duration) {
+      // Finalize
+      for (let i = 0; i < 5; i++) {
+        agentProgress[i] = task.agentTargets[i];
+        document.getElementById(`bar-${i}`).style.width = agentProgress[i] + '%';
+        document.getElementById(`pct-${i}`).textContent = agentProgress[i] + '%';
+      }
+      document.getElementById('qualityFill').style.width = '95%';
+      document.getElementById('qualityVal').textContent = '95%';
+      ciCurrent = 94;
+      document.getElementById('ciScore').textContent = '94';
+      stopSim();
+    }
+  } else if (!simActive) {
+    // Idle animation
+    const t = now;
+    nodeGlow = AGENTS.map((_, i) => (Math.sin(t * 0.001 + i * 1.2) + 1) * 0.15);
+  }
+
+  drawScene(now, simActive && !simPaused);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════════════════════════════
+
+document.getElementById('runBtn').addEventListener('click', () => {
+  if (simPaused) { pauseSim(); } else { startSim(); }
+});
+
+document.getElementById('pauseBtn').addEventListener('click', pauseSim);
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  stopSim();
+  resetSim();
+  document.getElementById('taskTag').textContent = 'IDLE';
+});
+
+document.querySelectorAll('.task-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (simActive) { stopSim(); resetSim(); }
+    document.querySelectorAll('.task-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const taskId = parseInt(btn.dataset.task);
+    currentTask = TASKS[taskId];
+    // Update task info
+    document.getElementById('taskInfo').innerHTML = `
+      <span class="task-info-icon">${currentTask.emoji}</span>
+      <div>
+        <div class="task-info-title">${currentTask.name}</div>
+        <div class="task-info-desc">${currentTask.desc}</div>
+      </div>
+    `;
+    document.getElementById('taskTag').textContent = 'IDLE';
+  });
+});
+
+document.querySelectorAll('.speed-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const newSpeed = parseInt(btn.dataset.speed);
+    if (simActive && !simPaused) {
+      simTime = (performance.now() - simStartWall) * simSpeed;
+      simSpeed = newSpeed;
+      simStartWall = performance.now() - simTime / simSpeed;
+    } else {
+      simSpeed = newSpeed;
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+
+window.addEventListener('resize', () => {
+  resizeCanvas();
+});
+
+resizeCanvas();
+initNodeStates();
+updateUI();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
