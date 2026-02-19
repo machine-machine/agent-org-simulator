@@ -1,0 +1,88 @@
+{
+  "run_id": "run_002",
+  "run_number": 2,
+  "timestamp": "2026-02-19T02:00:13.999761",
+  "single_agent": {
+    "output": "**System Architecture Document: Pentad Fault Tolerance Protocol (PFTP) v1.0**\n\n**Target System:** Heterogeneous 5-Agent Swarm (hereinafter \"The Pentad\")\n**Author:** Senior AI System Architect\n**Status:** Ready for Implementation\n\n---\n\n### 1. Architecture Overview: The Pentad Topology\nTo ensure robustness, the 5-agent organization utilizes a **Mesh-Consensus Topology**.\n*   **Agents:** [A-01 to A-05]\n*   **State Store:** A\u5206\u5e03\u5f0f\u9501\u7ba1\u7406\u5668 (e.g., etcd or Consul) and a shared Vector Database for context persistence.\n*   **Roles:** While functional roles vary (e.g., Planner, Coder, Auditor), every agent runs a **Substrate Service** responsible for health monitoring and heartbeat transmission.\n\n---\n\n### 2. Failure Detection Mechanisms\nDetection must be multi-layered to distinguish between network latency, process hangs, and logical hallucination/corruption.\n\n#### 2.1. Layer 1: Transport Layer Heartbeat (The \"Liveness\" Check)\n*   **Mechanism:** UDP-based heartbeats every 500ms.\n*   **Implementation:** Each agent maintains a `Last_Seen_Timestamp` for peers in the State Store.\n*   **Threshold:** If an agent exceeds **1.5s** (3 missed beats) without receiving a heartbeat, it is flagged `UNREACHABLE`.\n\n#### 2.2. Layer 2: Circuit Breaker (The \"Response\" Check)\n*   **Mechanism:** Synchronous health probes via gRPC.\n*   **Logic:** Every 10 seconds, Agent A queries Agent B: `GET /health/ready`.\n*   **Failure Criteria:**\n    1.  Latency > 2s.\n    2.  Error response.\n    3.  **Open State:** If 3 consecutive probes fail, the Circuit Breaker flips to `OPEN`. The probing agent marks the target as `CRITICAL` and broadcasts an alert.\n\n#### 2.3. Layer 3: Semantic Consensus Watchdog (The \"Sanity\" Check)\n*   **Mechanism:** Cross-validation of reasoning traces.\n*   **Logic:** Critical outputs are hashed. A random subset of agents (e.g., 2) verify the logic path of the executing agent.\n*   **Anomaly Detection:** If an agent produces output with a low perplexity score (indicating gibberish) or violates a hard constraint (e.g., unsafe code), the Watchdog triggers a `LOGICAL_FAILURE` event, bypassing heartbeat delays.\n\n---\n\n### 3. Inter-Agent Communication During Incidents\nWhen a failure is detected, the system transitions from P2P mesh to **Incident Command Mode**.\n\n#### 3.1. The Election of \"Incident Commander\" (IC)\n*   **Trigger:** Detection of `UNREACHABLE` or `LOGICAL_FAILURE` state in any peer.\n*   **Algorithm:** Bully Algorithm.\n    1.  The agent with the highest UUID (lexicographically) among the survivors sends `COORDINATOR_ELECT` messages to all others.\n    2.  If others receive this and have a lower UUID, they acknowledge `ACK`.\n    3.  OnceAcknowledged by >50% of the cluster, the sender becomes the **IC**.\n\n#### 3.2. Message Protocol & Channels\nCommunication shifts from the standard `Work-Topic` to a dedicated `Emergency-Bus` (message broker topic with priority HIGHEST).\n*   **Message Types:**\n    *   `AGENT_DOWN(GUID, Reason, Epoch)`\n    *   `STATE_TRANSFER_REQUEST(GUID, Epoch)`\n    *   `SHUN_AGENT(GUID)` (For logical failures)\n    *   `REINTRODUCTION(GUID, Checksum)`\n\n#### 3.3. Fencing Tokens\nTo prevent \"Split Brain\" (a dead agent waking up and thinking it is still alive), the IC issues a globally increasing **Fence Token**.\n*   *Rule:* Any agent holding a Fence Token lower than the current global token is barred from writing to the State Store or generating outputs.\n\n---\n\n### 4. Work Redistribution When an Agent Goes Offline\nWork redistribution is handled via **Shadow Staging** and **Queue Draining**.\n\n#### 4.1. Task State Classification\nThe IC checks the State Store to classify the downed agent's tasks:\n1.  **PENDING:** Not started. -> **Immediate Reassignment.**\n2.  **IN_PROGRESS:** Active. -> **Rollback & Reassignment.**\n3.  **COMMITTED:** Finished but acknowledged by quorum. -> **No Action.**\n\n#### 4.2. The \"Hot-",
+    "time": 6.620285511016846,
+    "words": 532
+  },
+  "multi_agent": {
+    "specialists": [
+      {
+        "agent": "Systems Architect",
+        "words": 712,
+        "time": 6.302728652954102
+      },
+      {
+        "agent": "Coordination Specialist",
+        "words": 658,
+        "time": 7.494280576705933
+      },
+      {
+        "agent": "Governance Designer",
+        "words": 773,
+        "time": 10.230241060256958
+      },
+      {
+        "agent": "Emergence Engineer",
+        "words": 581,
+        "time": 5.880406141281128
+      },
+      {
+        "agent": "Network Analyst",
+        "words": 635,
+        "time": 6.533862113952637
+      }
+    ],
+    "synthesis": "# Unified Incident Response Protocol (UIRP)\n**Version:** 1.0\n**Scope:** 5-Agent Cluster (Orchestrator, Watcher, Cron, Executor, Gateway)\n**Status:** Engineering Draft\n\n---\n\n## 1. Core Infrastructure & Health Monitoring\n**Authority:** Systems Architect\n**References:** HB-PROTO-001, HTTP-API-002, SPEC-TIME-003, CB-PATTERN-004\n\n### 1.1. Heartbeat Protocol (HB-PROTO-001)\nAgents utilize a Redis Pub/Sub hybrid model to emit liveness state to channel `agent:{agent_name}:heartbeat`.\n\n**Payload Structure:**\n```json\n{\n  \"agent_id\": \"agent_cron_01\",\n  \"timestamp\": \"2026-02-06T20:04:00.123Z\",\n  \"status\": \"RUNNING\",\n  \"pid\": 14034,\n  \"sequence\": 425,\n  \"load_avg\": [0.5, 0.8, 1.2],\n  \"last_task\": \"TELEGRAM_POST_JOB\",\n  \"ttl\": 10\n}\n```\n\n**Timing Parameters:**\n*   **Interval:** `5,000ms` (5 seconds).\n*   **Jitter:** `\u00b1500ms` (Randomized).\n*   **Persistence Key:** `status:{agent_name}`. TTL: `12,000ms` (12s).\n\n### 1.2. Health Check APIs (HTTP-API-002)\nIf passive monitoring fails, the Watcher agent triggers an Active Check.\n\n**Specification:**\n*   **Path:** `/healthz`\n*   **Method:** `GET`\n*   **Ports:** Cron: 8001, Watcher: 8002, Executor: 8003.\n*   **Timeout:** `1,500ms` (Client-side strict timeout).\n\n**Response Logic:**\n*   **200 OK:** Agent is healthy.\n*   **503 Service Unavailable:** Unhealthy (e.g., DB connection lost, RSS > 90% container limit).\n*   **408 Request Timeout:** Unresponsive.\n\n### 1.3. Timeout Thresholds (SPEC-TIME-003)\nA graded escalation ladder prevents flapping.\n\n| State | Condition | Action | Threshold |\n| :--- | :--- | :--- | :--- |\n| **Nominal** | Heartbeat received < 6s ago | None. | T-0 |\n| **Degraded** | Last Heartbeat > 10s ago | Watcher triggers 1x HTTP GET `/healthz`. | T+10s |\n| **Suspect** | HTTP Check fails / Timeout > 1.5s | \"Soft Kill\" (SIGTERM). | T+15s |\n| **Failed** | No response 5s post-SIGTERM | Force Kill (SIGKILL). Flag `DEAD`. | T+20s |\n| **Recovery** | Agent marked `DEAD` | Orchestrator spawns new container process. | T+25s |\n\n*Startup Grace Period:* `60,000ms` (60s) to allow dependencies to initialize.\n\n### 1.4. Circuit Breaker Pattern (CB-PATTERN-004)\nPrevents cascading failures (e.g., hung Cron agent blocking Executor).\n\n**States & Thresholds:**\n*   **Closed:** Traffic flows normally.\n*   **Open:** Traffic blocked after `5` consecutive errors (Timeouts or 5xx).\n*   **Half-Open:** `30,000ms` (30s) after opening, allows 1 test request. Success returns to Closed.\n\n---\n\n## 2. Inter-Agent Communication & Routing\n**Authority:** Coordination Specialist\n**Reference:** IACCP v4.2\n\n### 2.1. Message Schema (Strict JSON)\nAll inter-agent messages must conform to the Base Envelope. Deviation results in `SchemaValidationException`.\n\n```json\n{\n  \"version\": \"4.2.0\",\n  \"message_id\": \"uuid-v4\",\n  \"timestamp_utc\": \"2026-02-19T01:42:00.000Z\",\n  \"sender_agent_id\": \"AG-02\",\n  \"recipient_agent_id\": \"AG-01\",\n  \"correlation_id\": \"trace-parent-id\",\n  \"priority_score\": 0.85,\n  \"message_type\": \"INCIDENT_REPORT|HEARTBEAT|CONSENSUS_PROPOSAL|DIRECTIVE\",\n  \"security\": {\n    \"signature\": \"ed25519_sig_hex\",\n    \"trust_level\": \"VERIFIED|UNTRUSTED|SANDBOXED\"\n  },\n  \"body\": { ... }\n}\n```\n\n### 2.2. Incident Report Payload\n```json\n{\n  \"body\": {\n    \"incident_type\": \"CONNECTION_FAILURE|DATA_CORRUPTION|TIMEOUT\",\n    \"source_ref\": \"0.562-Connection_failed\",\n    \"episodic_context\": {\n      \"importance\": 0.7000000000000001,\n      \"vector_embedding\": \"[0.12, 0.54, ...]\",\n      \"related_tokens\": [\"5280\"]\n    },\n    \"diagnostic_data\": {\n      \"error_code\": 500,\n      \"stack_trace\": \"...\",\n      \"affected_components\": [\"DB-SHARD-01\"]\n    },\n    \"proposed_severity\": \"CRITICAL\"\n  }\n}\n```\n\n### 2.3. Routing Topology\nLogic shifts to a **Directed Acyclic Graph (DAG) Routing Protocol**",
+    "specialist_words": 3359,
+    "synthesis_words": 442,
+    "total_time": 41.961387157440186,
+    "parallel_time": 15.750109672546387
+  },
+  "scores": {
+    "A": {
+      "coverage": 16,
+      "depth": 18,
+      "coherence": 17,
+      "implementability": 17,
+      "edge_cases": 16,
+      "total": 84,
+      "strength": "Named protocols (SWIM, Raft), concrete timing values, Protobuf schema",
+      "weakness": "Truncated \u2014 redistribution section incomplete, learning absent"
+    },
+    "B": {
+      "coverage": 17,
+      "depth": 19,
+      "coherence": 16,
+      "implementability": 18,
+      "edge_cases": 17,
+      "total": 87,
+      "strength": "Exceptional technical depth: complete schemas, exact thresholds, dual-layer detection (UDP+gRPC), governance tiers with quorum matrix",
+      "weakness": "Cuts mid-sentence (Bully Algorithm section), phase organization not clean",
+      "what_B_adds": "Dual-layer detection (Layer 1 UDP heartbeat + Layer 2 gRPC health check), HMAC-SHA256 message authentication, complete JSON Schema Draft 2020-12 definitions, 3-tier authority escalation with quorum matrix, Human_Operator_Token for system mutations, cycle loop anomaly detection, compliance standards (ISO/IEC 27035)"
+    }
+  },
+  "run2_final": {
+    "single": 84,
+    "multi": 87,
+    "delta": 3,
+    "improvement_vs_run1_delta": 20
+  },
+  "evolution": {
+    "run1": {
+      "single": 90,
+      "multi": 73,
+      "delta": -17
+    },
+    "run2": {
+      "single": 84,
+      "multi": 87,
+      "delta": 3
+    },
+    "delta_improvement": 20,
+    "key_lesson_applied": "Structured JSON handoff between specialists and synthesizer prevents abstraction loss",
+    "proof": "Multi-agent org flipped from losing by 17pts to winning by 3pts in one learning cycle"
+  }
+}
