@@ -145,3 +145,44 @@ The synthesis faithfully used what specialists produced — the synthesis step i
 
 ### Run 6 Fix
 Prepend domain grounding sentence to every specialist prompt. Expected effect: all 5 specialists stay in AI org context → MA technical depth should reach 19+ → delta positive again.
+
+---
+
+## Run 6 — Multi-Agent Org Wins Decisively: 97 vs 86
+
+| Dimension | Single Agent | Multi-Agent Org | Winner |
+|-----------|-------------|-----------------|--------|
+| Coverage | 18/20 | **20/20** | **MA** |
+| Technical Depth | 17/20 | **20/20** | **MA** |
+| Coherence | 18/20 | **19/20** | **MA** |
+| Implementability | 17/20 | **19/20** | **MA** |
+| Edge Cases | 16/20 | **19/20** | **MA** |
+| **TOTAL** | **86/100** | **97/100** | **MA wins all 5 dimensions** |
+
+**Delta: +11 — largest MA win in the benchmark.**
+
+### What Changed: Domain Grounding + Claude Synthesis
+1. **Domain grounding:** Every specialist prompt included: *"This is NOT cybersecurity. Agents are LLM-based software processes. No SIEM, SOC, MITRE terminology."* — All 6 specialists stayed on-domain.
+2. **Claude Sonnet 4.6 for synthesis:** No token limits, no hallucination, faithfully integrated all specialist values, added Integration Points tracing exact data flow across phase boundaries.
+
+### What Multi-Agent Org Produced That Single Agent Missed
+- ✅ **SemanticHealthCheck:** validates recovered model's *embedding output* is semantically correct — not just HTTP 200, but LLM-level correctness verification
+- ✅ **SemanticMemoryInjection:** injects failure patterns into shared org vector store — the org learns from every incident
+- ✅ **InferenceTraceAggregation:** LLM-specific metrics: `ttft_ms`, `hallucination_score`, `reasoning_loop_count`, `context_window_utilization`
+- ✅ **VectorStreamReplay:** XREADGROUP idempotency check for exactly-once event replay during recovery
+- ✅ **Isolation Forest on reasoning step sequences:** detects anomalous reasoning patterns *before* full failure
+- ✅ **AMQP QoS LoadShedGuard:** LLM-native canary ramp based on `gpu_util < 85%` and `queue_latency < 100ms`
+- ✅ **EWMA on TTFT watchdog:** single agent found this too — synthesis integrated it across both outputs
+
+### Full Evolution Summary
+
+| Run | SA | MA | Δ | Key Fix |
+|-----|----|----|---|---------|
+| 1 | 90 | 73 | −17 | Baseline |
+| 2 | 84 | 87 | **+3** | Structured JSON handoff |
+| 3 | 85 | 87 | **+2** | Phase-locked structure |
+| 4 | 92 | 68 | −24 | ❌ Split synthesis hallucinated |
+| 5 | 86 | 83 | −3 | Synthesis fixed; domain drift |
+| 6 | 86 | **97** | **+11** | ✅ Domain grounding + Claude synthesis |
+
+**The org learned from every failure and converged on 97/100.**
