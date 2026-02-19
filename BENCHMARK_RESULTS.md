@@ -80,3 +80,36 @@
 **Known fix:** Phase 3 (Redistribute Work) and Phase 5 (Post-Incident Learning) were thin because two specialist JSON calls failed and used simplified retries. Next run adds retry logic with explicit short prompts on first attempt.
 
 Expected improvement: Coverage 16 → 18, potentially pushing MA to 90+.
+
+---
+
+## Run 4 — REGRESSION (Critical Lesson)
+
+| Dimension | Single Agent | Multi-Agent Org |
+|-----------|-------------|-----------------|
+| Coverage | **19/20** | 16/20 |
+| Technical Depth | **19/20** | 11/20 |
+| Coherence | **19/20** | 14/20 |
+| Implementability | **18/20** | 13/20 |
+| Edge Cases | **17/20** | 14/20 |
+| **TOTAL** | **92/100** | **68/100** · **Delta: −24** |
+
+### What Went Wrong
+
+**Root cause:** We tried to fix the synthesis token limit problem by splitting synthesis into 5 separate phase-by-phase calls, each receiving only a truncated excerpt of the specialist JSON.
+
+**Effect:** The model hallucinated convincingly wrong values — "ABAC algorithm", "SEV-1 through SEV-5", "bgp_route_flap_count" — none of which came from the specialists. When the model doesn't have enough context, it fills gaps with plausible-sounding but incorrect domain knowledge.
+
+**Protocol Amendment (auto-committed to fleet-governance):**
+> *Never truncate specialist input for synthesis. A single synthesis call with full JSON input is better than split calls with truncated input. If the model hits token limits, retry with higher max_tokens. If that fails, use a higher-capacity model for the synthesis step only — synthesis is post-processing, not core agent execution.*
+
+### What Run 4 Single Agent Did Well (92/100 — best yet)
+- Phi Accrual with specific threshold value (Phi = 8.0)
+- KetamaConsistentHash with vnode ranges and CAS operations
+- PlumtreeProtocol for gossip with O(log N) complexity bound
+- MerkleTreeDeltaSync for bandwidth-efficient state recovery
+- PIDControllerRamp for canary traffic (feedback loop on error rate)
+- ByzantineConsistencyRanker for semantic hallucination detection
+
+### Run 5 Fix
+Single synthesis call. Max_tokens raised to 8000. Full specialist JSON, no truncation. If Cerebras returns empty content, retry once with +2000 tokens. Fallback: same synthesis prompt sent to Claude if 3 attempts fail.

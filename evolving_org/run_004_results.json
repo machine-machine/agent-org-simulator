@@ -1,0 +1,487 @@
+{
+  "run_id": "run_004",
+  "timestamp": "2026-02-19T02:21:59.966884",
+  "fixes_applied": [
+    "Retry logic: 3 attempts with increasing token budget on empty response",
+    "6 specialists (added dedicated Recovery Specialist for Phase 4)",
+    "Specialist prompts include example JSON schema to match",
+    "Synthesis requires 'Integration Points Between Phases' section",
+    "Synthesis explicitly checks all 7 sections before finishing"
+  ],
+  "phase_coverage": {
+    "single": 5,
+    "multi": 5
+  },
+  "specificity_markers": {
+    "single": 7,
+    "multi": 0
+  },
+  "single_agent": {
+    "output": "## Phase 1: Detect\n\n**Mechanism 1: Phi-Accrual Heartbeat Monitor**\nThis mechanism ensures detection of agent unresponsiveness or crashes by analyzing heartbeat arrival intervals against a dynamic threshold rather than a fixed timeout.\n\n*   **Protocol:** `PULSE_PHI_V2`\n*   **Timing:**\n    *   Heartbeat Interval: `100ms`\n    *   Detection Threshold: `Phi = 8.0` (typically corresponding to ~99.999% certainty of failure)\n    *   Time-to-Suspend (TTS): `350ms` post-detection\n*   **Message Schema:**\n    ```json\n    {\n      \"hdr\": { \"type\": \"HEARTBEAT\", \"src_id\": \"AGENT_03\", \"ts\": 1689012345678 },\n      \"payload\": {\n        \"seq_no\": 4521,\n        \"load_avg\": 0.72,\n        \"health_status\": \"GREEN\"\n      }\n    }\n    ```\n*   **Algorithm:** `AdaptivePhiAccrual` \u2013 Calculates the suspicion level ($\\Phi$) based on the mean and standard deviation of recent inter-arrival times. If $\\Phi > 8.0$, the agent is marked `SUSPECTED_FAILED`.\n\n**Mechanism 2: Semantic Sanity Consensus**\nTo detect \"silent failures\" where an agent is running but producing hallucinations or garbage logic, peer agents validate output state vectors.\n\n*   **Protocol:** `SEMANTIC_WATCH_V1`\n*   **Timing:**\n    *   Validation Check: `Every 500ms`\n    *   Consensus Timeout: `150ms`\n*   **Message Schema:**\n    ```json\n    {\n      \"hdr\": { \"type\": \"SANITY_CHECK\", \"src_id\": \"AGENT_01\", \"ts\": 1689012346200 },\n      \"payload\": {\n        \"task_id\": \"T-909\",\n        \"output_hash\": \"a7f3c1\",\n        \"confidence_vector\": [0.98, 0.02, 0.00]\n      }\n    }\n    ```\n*   **Algorithm:** `ByzantineConsistencyRanker` \u2013 A distance-based algorithm that compares the semantic embeddings of agent outputs. If the cosine distance between Agent $i$'s output and the cluster median exceeds $\\delta = 0.85$, the agent is flagged for `LOGIC_CORRUPTION`.\n\n---\n\n## Phase 2: Alert & Communication\n\n**Mechanism 1: Gossip-Based Failure Broadcast**\nUpon detection, the discovering agent propagates the alarm to the swarm without a central coordinator to prevent single points of failure.\n\n*   **Protocol:** `EPIDEMIC_ALERT_GOSSIP`\n*   **Timing:**\n    *   Initial Propagation: `5ms`\n    *    fan-out: 2 random peers\n    *   Total Cluster Convergence: `< 50ms`\n*   **Message Schema:**\n    ```json\n    {\n      \"hdr\": { \"type\": \"FAILURE_BROADCAST\", \"src_id\": \"AGENT_02\", \"ttl\": 5 },\n      \"payload\": {\n        \"incident_id\": \"INC-2023-001\",\n        \"failed_agent\": \"AGENT_03\",\n        \"reason_code\": \"PHI_TIMEOUT\",\n        \"epoch\": 992\n      }\n    }\n    ```\n*   **Algorithm:** `PlumtreeProtocol` \u2013 Optimizes gossip by maintaining a_lazy peer list to suppress duplicate messages while ensuring `O(log N)` message complexity for rapid dissemination.\n\n**Mechanism 2: Role Re-election Announcement**\nOnce the failure is known, a specific message triggers the reconfiguration of the cluster's logical ring.\n\n*   **Protocol:** `RAFT_LEADER_APPEND`\n*   **Timing:**\n    *   Election Timeout: `150ms`\n    *   Vote Collection: `100ms`\n*   **Message Schema:**\n    ```json\n    {\n      \"hdr\": { \"type\": \"LEADER_ELECTION\", \"term\": 14 },\n      \"payload\": {\n        \"candidate_id\": \"AGENT_05\",\n        \"last_log_index\": 1024,\n        \"last_log_term\": 13\n      }\n    }\n    ```\n*   **Algorithm:** `LeaderElection_Raft` \u2013 Uses a randomized timer to split the vote, ensuring the most up-to-date agent (based on log replication state) becomes the new coordinator for the redistribution phase.\n\n---\n\n## Phase 3: Redistribute Work\n\n**Mechanism 1: Consistent Hashing Migration**\nWork is assigned based on a hash ring. When an agent fails, its keyspace is immediately claimed by the adjacent neighbor(s).\n\n*   **Protocol:** `RING_VNODE_MIGRATE`\n*   **Timing:**\n    *   Key identification: `20ms`\n    *   Owner Re-assignment: `10ms`\n*   **Message Schema:**\n    ```json\n    {\n      \"hdr\": { \"type\": \"OWNERSHIP_TRANSFER\", \"src_id\": \"AGENT_02\" },\n      \"payload\": {\n        \"vnode_range_start\": \"A400\",\n        \"vnode_range_end\": \"F800\",\n        \"new_owner\": \"AGENT_04\",\n        \"checkpoint_token\": \"ckp_8821\"\n      }\n    }\n    ```\n*   **Algorithm:** `KetamaConsistentHash` \u2013 Maps agent IDs and task IDs onto a continuum of points (virtual nodes). Upon failure, only the keys specifically mapped to the failed agent ($A_{fail}$) are remapped to the immediate clockwise neighbor ($A_{neighbor}$), minimizing data shuffle.\n\n**Mechanism 2: Pending Task Atomic Queue Drain**\nTasks that were actively being processed by the failed agent are rollbacked and re-queued.\n\n*   **Protocol:** `TX_ROLLBACK_REQUEUE`\n*   **Timing:**\n    *   Lock Release: `5ms`\n    *   Queue Priority Insertion: `15ms`\n*   **Message Schema:**\n    ```json\n    {\n      \"hdr\": { \"type\": \"TASK_RECOVERY\", \"src_id\": \"COORDINATOR\" },\n      \"payload\": {\n        \"lost_tasks\": [\"ID-772\", \"ID-773\", \"ID-774\"],\n        \"original_state\": \"IN_PROGRESS\",\n        \"new_priority\": 1\n      }\n    }\n    ```\n*   **Algorithm:** `PriorityMinHeapRescheduler` \u2013 A non-blocking algorithm that takes the vector of lost tasks, sorts them based on their deadline slack time, and inserts them at the head of the global distributed queue using an atomic compare-and-swap (CAS) operation.\n\n---\n\n## Phase 4: Recover & Reintegrate\n\n**Mechanism 1: Checkpoint-Based State Synchronization**\nThe recovered agent must fetch the latest global state before accepting new traffic to ensure consistency.\n\n*   **Protocol:** `STATE_SYNC_PULL`\n*   **Timing:**\n    *   Delta Calculation: `50ms`\n    *   Transfer: `200ms` (dependent on state size)\n*   **Message Schema:**\n    ```json\n    {\n      \"hdr\": { \"type\": \"STATE_REQUEST\", \"src_id\": \"AGENT_03\" },\n      \"payload\": {\n        \"last_checkpoint_seq\": 4521,\n        \"requested_shards\": [\"SHARD_A\", \"SHARD_B\"]\n      }\n    }\n    ```\n*   **Algorithm:** `MerkleTreeDeltaSync` \u2013 The recovering agent computes a Merkle tree of its local state and requests a tree comparison from the Leader. Only the leaf nodes (data blocks) with differing hashes are transferred, significantly reducing bandwidth usage.\n\n**Mechanism 2: Probabilistic Canary Traffic**\nTraffic is not restored to 100% immediately. Load is increased gradually based on a feedback loop of the agent's latency and error rate.\n\n*   **Protocol:** `TRAFFIC_RAMP_UP`\n*   **Timing:**\n    *   Step Interval: `100ms`\n    *   Max Ramp-up Time: `2000ms` (to 100%)\n*   **Message Schema:**\n    ```json\n    {\n      \"hdr\": { \"type\": \"LOAD_ADJUSTMENT\", \"src_id\": \"LOAD_BALANCER\" },\n      \"payload\": {\n        \"target_agent\": \"AGENT_03\",\n        \"rate_limit_percent\": 25,\n        \"evaluation_window_ms\": 100\n      }\n    }\n    ```\n*   **Algorithm:** `PIDControllerRamp` \u2013 A Proportional-Integral-Derivative controller adjusts the traffic rate. The input variable is the error rate (target 0%), and the output is the traffic percentage. If error spikes, the derivative term reacts instantly to throttle traffic.\n\n---\n\n## Phase 5: Post-Incident Learning\n\n**Mechanism 1: Automated Causal Graph Reconstruction**\nThe system analyzes the logs to determine the root cause, not just the symptom.\n\n*   **Protocol:** `ROOT_CAUSE_ANALYZE`\n*   **Timing:**\n    *   Log Aggregation: `2000ms`\n    *   Graph Processing: `1500ms`\n*   **Message Schema:**\n    ```json\n    {\n      \"hdr\": { \"type\": \"ANALYSIS_REPORT\", \"src_id\": \"ORACLE_AGENT\" },\n      \"payload\": {\n        \"incident_id\": \"INC-2023-001\",\n        \"root_cause\": \"MEMORY_LEAK_MODULE_X\",\n        \"caus",
+    "time": 6.82,
+    "words": 884
+  },
+  "multi_agent": {
+    "specialists": [
+      {
+        "agent_role": "Site Reliability Engineer",
+        "phase": "Detect",
+        "mechanisms": [
+          {
+            "name": "Consensus Liveness Probe",
+            "protocol": "Raft over TCP",
+            "timing_ms": 500,
+            "threshold": "Last heartbeat > 2s",
+            "algorithm": "Leader Lease",
+            "failure_modes": [
+              "leader election timeout",
+              "split-brain scenario"
+            ]
+          },
+          {
+            "name": "Context Window Saturation Monitor",
+            "protocol": "gRPC Stream",
+            "timing_ms": 100,
+            "threshold": "Utilization > 95% for 10s",
+            "algorithm": "Leaky Bucket",
+            "failure_modes": [
+              "memory leak",
+              "token bloat",
+              "runaway generation"
+            ]
+          },
+          {
+            "name": "Tool Execution Latency Observer",
+            "protocol": "Async Message Queue",
+            "timing_ms": 2000,
+            "threshold": "P95 Latency > 10s",
+            "algorithm": "Exponential Weighted Moving Average",
+            "failure_modes": [
+              "API throttling",
+              "dependency deadlock",
+              "hang"
+            ]
+          }
+        ],
+        "open_questions": [
+          "Is the detection logic synchronous or asynchronous?",
+          "What is the fallback if the Raft cluster loses quorum?"
+        ]
+      },
+      {
+        "agent_role": "Incident Response Orchestrator",
+        "phase": "Alert",
+        "escalation_slas": [
+          {
+            "level": "TIER-1_AUTO",
+            "target": "Auto-Remediation Service",
+            "time_to_ack_seconds": 5,
+            "time_to_resolve_seconds": 60
+          },
+          {
+            "level": "TIER-2 Ops",
+            "target": "Duty Engineering Team",
+            "time_to_ack_seconds": 300,
+            "time_to_resolve_seconds": 1800
+          },
+          {
+            "level": "TIER-3 MGMT",
+            "target": "Crisis Command",
+            "time_to_ack_seconds": 900,
+            "time_to_resolve_seconds": 3600
+          }
+        ],
+        "mechanisms": [
+          {
+            "name": "PriorityHeartbeat",
+            "protocol": "SCTP",
+            "timing_ms": 25,
+            "threshold": "signal loss > 2x interval",
+            "algorithm": "Bi-directional Forwarding Detection (BFD)",
+            "message_schema": {
+              "sequence_id": "uint64",
+              "agent_status": "enum[ACTIVE,DEGRADED,STUCK]",
+              "load_avg": "float32",
+              "timestamp": "int64"
+            },
+            "failure_modes": [
+              "path flapping",
+              "clock drift"
+            ]
+          },
+          {
+            "name": "IncidentCorroboration",
+            "protocol": "GraphQL over WebSocket",
+            "timing_ms": 100,
+            "threshold": "3 peer confirmations",
+            "algorithm": "Consistent Hashing Ring",
+            "message_schema": {
+              "event_uuid": "UUID",
+              "category": "string",
+              "impact_score": "int",
+              "peer_votes": "[]string",
+              "evidence_digest": "string"
+            },
+            "failure_modes": [
+              "ring churn",
+              "schema version mismatch"
+            ]
+          }
+        ],
+        "open_questions": []
+      },
+      {
+        "agent_role": "Principal Governance Architect",
+        "phase": "Declaration",
+        "mechanisms": [
+          {
+            "name": "Delegated Authority Matrix",
+            "protocol": "gRPC",
+            "timing_ms": 45,
+            "threshold": "confidence >= 0.85",
+            "algorithm": "Attribute-Based Access Control (ABAC)",
+            "who_decides_what": {
+              "SEV-5_Observation": {
+                "whos_deciding": "Auto-Remediation_Bot",
+                "decision_scope": "Log anomaly, open ticket, NO activation of bridges"
+              },
+              "SEV-4_Deployment": {
+                "whos_deciding": "Duty_Engineer",
+                "decision_scope": "Declare incident, roll back single service, notify team"
+              },
+              "SEV-3_Service_Outage": {
+                "whos_deciding": "On-Call_Manager",
+                "decision_scope": "Escalate to SEV-2, authorize external comms delay, mobilize war room"
+              },
+              "SEV-2_Business_Critical": {
+                "whos_deciding": "VP_Engineering_Designate",
+                "decision_scope": "Declare company-wide outage, approve overtime budget, engage legal counsel"
+              },
+              "SEV-1_Existential": {
+                "whos_deciding": "C-Suite_Steering_Committee",
+                "decision_scope": "Activate disaster recovery sites, authorize public breach disclosure, override compliance controls"
+              }
+            },
+            "validation_layers": [
+              {
+                "layer": "Active_Session",
+                "check": "must exist"
+              },
+              {
+                "layer": "MFA_Challenge",
+                "check": "required for SEV >= 2"
+              },
+              {
+                "layer": "Peer_Review",
+                "check": "required for SEV >= 1"
+              }
+            ],
+            "failure_modes": [
+              "stale_session",
+              "revoked_credentials"
+            ]
+          },
+          {
+            "name": "Declaration Broadcast Bus",
+            "protocol": "NATS JetStream",
+            "timing_ms": 10,
+            "threshold": "on_commit",
+            "algorithm": "At-Least-Once Delivery",
+            "payload_schema": {
+              "declaration_id": "UUID",
+              "severity": "int",
+              "declaring_principal": "string",
+              "authorisation_token_hash": "SHA256",
+              "timestamp_epoch": "long"
+            },
+            "failure_modes": [
+              "stream_overflow",
+              "consumer_disconnect"
+            ]
+          }
+        ],
+        "open_questions": [
+          "Does a Designate retain authority if the originating Incident Commander is offline?",
+          "Can the Auto-Remediation Bot trigger SEV-4 if data loss is detected?"
+        ]
+      },
+      {
+        "agent_role": "Distributed Systems Architect",
+        "phase": "Failover",
+        "mechanisms": [
+          {
+            "name": "Failure Detector",
+            "protocol": "SWIM",
+            "timing_ms": 3000,
+            "threshold": "phi accrual > 8",
+            "algorithm": "Phi Accrual Failure Detector",
+            "failure_modes": [
+              "false positive (network flap)",
+              "suspicion timeout skew"
+            ]
+          },
+          {
+            "name": "Lease Reclamation",
+            "protocol": "etcd",
+            "timing_ms": 100,
+            "threshold": "TTL expired",
+            "algorithm": "compare-and-swap",
+            "message_schema": {
+              "resource_key": "string",
+              "holder_id": "UUID",
+              "revision": "int64"
+            },
+            "failure_modes": [
+              "split-brain write",
+              "session expiration storm"
+            ]
+          },
+          {
+            "name": "Partition Reassignment",
+            "protocol": "Raft",
+            "timing_ms": 500,
+            "threshold": "quorum_acknowledged",
+            "algorithm": "consistent hashing (virtual nodes)",
+            "message_schema": {
+              "partition_id": "int",
+              "range_start": "int",
+              "range_end": "int",
+              "replicas": "list<UUID>"
+            },
+            "failure_modes": [
+              "hotspot imbalance",
+              "replica sync lag"
+            ]
+          },
+          {
+            "name": "Execution Throttling",
+            "protocol": "gRPC",
+            "timing_ms": 10,
+            "threshold": "queue_depth >= limit",
+            "algorithm": "token bucket",
+            "failure_modes": [
+              "head-of-line blocking",
+              "latency spikes"
+            ]
+          }
+        ],
+        "open_questions": [
+          "Exactly-once vs at-least-once delivery semantics?",
+          "Timeout tolerance for long-running transactions?",
+          "Maximum state transfer size per partition?"
+        ]
+      },
+      {
+        "agent_role": "Network Analyst",
+        "phase": "Learn",
+        "mechanisms": [
+          {
+            "name": "Anomaly Pattern Embedder",
+            "protocol": "OpenTelemetry (OTLP)",
+            "timing_ms": 2000,
+            "threshold": "incident_status == resolved",
+            "algorithm": "Transformer-based Log Embeddings",
+            "metrics": [
+              "log_vector_distance",
+              "anomaly_frequency_24h",
+              "packet_loss_burst_rate",
+              "bgp_route_flap_count",
+              "latency_spike_magnitude"
+            ],
+            "message_schema": {
+              "incident_id": "UUID",
+              "anomaly_hash": "SHA256",
+              "embedding_vector": "[float32]",
+              "root_cause_category": "string",
+              "affected_subnets": "[]string"
+            },
+            "failure_modes": [
+              "embedding_dimension_mismatch",
+              "high_cardinality_overflow"
+            ]
+          },
+          {
+            "name": "Remediation Action Validator",
+            "protocol": "RESTCONF",
+            "timing_ms": 1500,
+            "threshold": "confidence_score > 0.85",
+            "algorithm": "Rule-Based Decision Tree",
+            "metrics": [
+              "validation_latency_ms",
+              "acl_conflict_rate",
+              "config_precheck_failures",
+              "impact_radius_score"
+            ],
+            "message_schema": {
+              "action_id": "UUID",
+              "target_device": "string",
+              "config_changes": "map[string]string",
+              "rollback_plan": "string",
+              "estimated_downtime_ms": "int"
+            },
+            "failure_modes": [
+              "syntax_error_blocking",
+              "dependency_chain_loop"
+            ]
+          },
+          {
+            "name": "Baseline Noise Filter",
+            "protocol": "Prometheus Remote Write",
+            "timing_ms": null,
+            "threshold": "std_dev > 3 * historical_std_dev",
+            "algorithm": "Exponential Weighted Moving Average (EWMA)",
+            "metrics": [
+              "interface_util_avg",
+              "icmp_echo_variance",
+              "throughput_baseline_delta",
+              "false_positive_suppression_count"
+            ],
+            "message_schema": {
+              "metric_name": "string",
+              "window_start": "timestamp",
+              "window_end": "timestamp",
+              "new_lower_bound": "float64",
+              "new_upper_bound": "float64",
+              "adjustment_reason": "string"
+            },
+            "failure_modes": [
+              "threshold_overfitting",
+              "signal_loss"
+            ]
+          }
+        ],
+        "open_questions": [
+          "How to balance model re-train frequency vs. compute cost?",
+          "Should manual overrides on automated runbooks decay over time?"
+        ]
+      },
+      {
+        "agent_role": "Resilience Orchestrator",
+        "phase": "Remediation",
+        "mechanisms": [
+          {
+            "name": "Deep Health Inspection",
+            "protocol": "gRPC",
+            "timing_ms": 5000,
+            "threshold": "Memory < 90% & Dependency Sockets Open",
+            "algorithm": "Binary Exponential Backoff",
+            "failure_modes": [
+              "partial load blindness",
+              "resource thrashing"
+            ]
+          },
+          {
+            "name": "Traffic Shadowing Ramp",
+            "protocol": "Istio / VirtualService",
+            "timing_ms": null,
+            "threshold": "5xx response rate == 0",
+            "algorithm": "Weighted Round Robin",
+            "stages": [
+              {
+                "pct": 5,
+                "hold_s": 120
+              },
+              {
+                "pct": 25,
+                "hold_s": 300
+              },
+              {
+                "pct": 100,
+                "hold_s": 0
+              }
+            ],
+            "failure_modes": [
+              "cache stampede",
+              "downstream saturation"
+            ]
+          },
+          {
+            "name": "Event Store Rehydration",
+            "protocol": "NATS JetStream",
+            "timing_ms": 100,
+            "threshold": "Sequence ID aligned",
+            "algorithm": "Snapshot Delta Merge",
+            "failure_modes": [
+              "duplicate event ingestion",
+              "state version conflict"
+            ]
+          }
+        ],
+        "open_questions": [
+          "What is the Time-To-Recover (TTR) SLA?",
+          "Is manual approval required for the 25% traffic stage?"
+        ]
+      }
+    ],
+    "synthesis": "\n\n---\n\n## Phase 1: Detect\nThe detection layer utilizes a heartbeat protocol via gRPC to track system integrity continuously. Health check mechanisms evaluate operational signals against the confidence >= 0.85 threshold to identify anomalies efficiently. If deviations occur, a circuit breaker triggers to isolate failures within a specific timing_ms of 45. These metrics are processed by the Attribute-Based Access Control (ABAC) algorithm to determine initial response scope. This design ensures SEV-5_Observation data is logged accurately without premature escalation, relying strictly on verifiable thresholds. This automated filtering guarantees that only valid breaches reach higher authority decision-makers.\n\n## Phase 2: Alert & Communication\nImmediate incident detection triggers a robust multicast alert distributed via the gRPC protocol to ensure synchronized stakeholder awareness. This critical transmission is validated against a `confidence >= 0.85` threshold, executed within a strict `45ms` window to minimize system latency. Communication routing is governed by the Delegated Authority Matrix, employing an Attribute-Based Access Control (ABAC) algorithm to enforce a structured tier-based authority chain. While SEV-5 anomalies allow automated remediation, higher severity events escalate through designated human layers. SEV-4 issues prompt the Duty_Engineer, whereas SEV-3 service outages require the On-Call Manager to mobilize the war room. For critical impacts, consensus-based protocols activate the C-Suite_Steering_Committee for SEV-1 existential threats or the VP_Engineering_Designate for SEV-2 business outages. This precise hierarchy ensures that authorization scopes\u2014ranging from internal logging to public breach disclosure\u2014are strictly aligned with incident severity levels.\n\n## Phase 3: Redistribute Work\n\nExecute `PROTOCOL: EMERGENCY_QUEUE_TAKEOVER` to isolate compromised processing units immediately. Rebalance traffic using `ALGORITHM: ADAPTIVE_WEIGHTED_ROUND_ROBIN`, ensuring server utilization remains below the critical `THRESHOLD: CPU_UTILIZATION 80%`. Simultaneously, apply backpressure through `ALGORITHM: EXPONENTIAL_SMOOTH\n\n## Phase 4: Recover & Reintegrate\n\nRecovery initiates with health gate validation to confirm system stability before resuming operations. We perform a state sync via Raft log replay, ensuring strict data consistency across the distributed consensus layer. Once validated, traffic restoration begins using a canary traffic ramp. The protocol directs 10% of total traffic to the recovered node, maintaining a specific hold time to observe latency and error rates. If the system remains stable, we escalate to 50% traffic to test load-bearing capacity under stress. Finally, we restore 100% traffic, completing the reintegration. This structured approach guarantees a safe return to full capacity, upholding all recovery protocols and algorithmic constraints while mitigating regression risks.\n\n## Phase 5: Post-Incident Learning\nFollowing a verified `incident_status == resolved`, the system initiates telemetry capture via `OpenTelemetry (OTLP)` with a timing of 2000 ms. Utilizing `Transformer-based Log Embeddings`, it tracks `log_vector_distance`, `anomaly_frequency_24h`, `packet_loss_burst_rate`, `bgp_route_flap_count`, and `latency_spike_magnitude`. The knowledge graph update schema incorporates fields like `incident_id`, `anomaly_hash`, `embedding_vector`, `root_cause_category`, and `affected_subnets`. Simultaneously, the recurrence detector operates via `RESTCONF` (1500 ms), using a `Rule-Based Decision Tree` when `confidence_score > 0.85`. It assesses `validation_latency_ms`, `acl_conflict_rate`, `config_precheck_failures`, and `impact_radius_score` against the remediation schema containing `action_id`, `target_device`, `config_changes`, and `rollback_plan` to mitigate risks like `embedding_dimension_mismatch`.\n\n## Integration Points\n\n**Detect \u2192 Alert**\nThe **Detect** phase forwards raw logs and threshold-exceeded anomaly scores to the **Alert** phase to trigger notifications. This data payload includes specific event signatures, timestamps, and affected asset identifiers required for immediate triage. By standardizing this input, the **Alert** phase can correlate isolated signals into a cohesive incident timeline.\n\n**Alert \u2192 Redistribute**\nA formal classification of the incident severity and scope within the **Alert** phase serves as the decision key to unlock the **Redistribute** phase. This handoff occurs only when automated validation or analyst confirmation determines that traffic shifting or isolation is necessary. Consequently, unauthorized redistribution attempts are blocked until the threat is verified as actionable.\n\n**Redistribute \u2192 Recover**\nThe transition from **Redistribute** to **Recover** is triggered when traffic metrics stabilize and the orchestration platform confirms the active threat is neutralized. Redistribution stops automatically once system utilization falls back within baseline operational thresholds. This status change signals the end of active mitigation and authorizes the restoration of standard routing paths.\n\n**Recover \u2192 Learn**\nThe **Recover** phase generates a comprehensive packet capture archive and",
+    "synthesis_time": 8.95,
+    "specialist_times": [
+      4.06,
+      3.22,
+      4.81,
+      3.9,
+      5.84,
+      3.11
+    ],
+    "words": 653
+  },
+  "synthesis_method": "phase-by-phase (6 targeted calls instead of 1 combined)",
+  "scores": {
+    "A": {
+      "coverage": 19,
+      "depth": 19,
+      "coherence": 19,
+      "implementability": 18,
+      "edge_cases": 17,
+      "total": 92,
+      "strength": "Best SA yet: Phi=8.0 threshold, KetamaConsistentHash, PlumtreeProtocol, MerkleTreeDeltaSync, PIDControllerRamp, complete JSON schemas on every mechanism",
+      "weakness": "Phase 5 truncated mid-analysis-report (cut off before fully showing root-cause structure)"
+    },
+    "B": {
+      "coverage": 16,
+      "depth": 11,
+      "coherence": 14,
+      "implementability": 13,
+      "edge_cases": 14,
+      "total": 68,
+      "strength": "Integration Points section (phase handoffs) is well-structured; canary ramp preserved correctly",
+      "weakness": "REGRESSION: phase-by-phase synthesis with truncated specialist input caused model to hallucinate \u2014 ABAC, SEV-5, bgp_route_flap all invented"
+    }
+  },
+  "run4_final": {
+    "single": 92,
+    "multi": 68,
+    "delta": -24
+  },
+  "critical_lesson": "Phase-by-phase synthesis with truncated input causes model hallucination. Model fills gaps with plausible-sounding but wrong values (ABAC, SEV-5, bgp metrics). Fix: full-context single synthesis call with max_tokens>=6000. If Cerebras token limit is hit, use Claude for synthesis step only.",
+  "evolution_table": [
+    {
+      "run": 1,
+      "single": 90,
+      "multi": 73,
+      "delta": -17,
+      "fix": "baseline"
+    },
+    {
+      "run": 2,
+      "single": 84,
+      "multi": 87,
+      "delta": 3,
+      "fix": "structured JSON handoff"
+    },
+    {
+      "run": 3,
+      "single": 85,
+      "multi": 87,
+      "delta": 2,
+      "fix": "phase-locked synthesis"
+    },
+    {
+      "run": 4,
+      "single": 92,
+      "multi": 68,
+      "delta": -24,
+      "fix": "regression \u2014 split synthesis hallucinated; lesson: never truncate specialist input"
+    }
+  ]
+}
