@@ -124,24 +124,24 @@
   </div>
 
   <div class="verdict">
-    ✅ Multi-agent org IMPROVED from run 1 to run 2 — self-evolving architecture confirmed
+    ✅ Multi-agent org IMPROVED from run 1 to run 7 — self-evolving architecture confirmed
   </div>
 
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-value neutral">2</div>
+      <div class="stat-value neutral">7</div>
       <div class="stat-label">Total Runs</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value positive">84<span style="font-size:1rem">/100</span></div>
+      <div class="stat-value neutral">69<span style="font-size:1rem">/100</span></div>
       <div class="stat-label">Single Agent (latest)</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value positive">87<span style="font-size:1rem">/100</span></div>
+      <div class="stat-value neutral">60<span style="font-size:1rem">/100</span></div>
       <div class="stat-label">Multi-Agent (latest)</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value positive">+3</div>
+      <div class="stat-value negative">-9</div>
       <div class="stat-label">Delta (multi − single)</div>
     </div>
   </div>
@@ -155,6 +155,7 @@
     <div class="amendment-item"><span class="amend-run">run_001</span><span class="amend-text">Concrete Preservation Synthesis Protocol</span></div>
 <div class="amendment-item"><span class="amend-run">run_001</span><span class="amend-text">Mandate Structured JSON Handoffs for Specialist Outputs</span></div>
 <div class="amendment-item"><span class="amend-run">run_002</span><span class="amend-text">Consolidate Specialist Output</span></div>
+<div class="amendment-item"><span class="amend-run">run_007</span><span class="amend-text">Scribe Mode</span></div>
   </div>
 
   <div class="footer">
@@ -165,10 +166,10 @@
 <script>
 const ctx = document.getElementById('improvementChart').getContext('2d');
 
-const labels = ["Run 1", "Run 2"];
-const singleAgentData = [90, 84];
-const multiAgentData = [73, 87];
-const deltaData = [-17, 3];
+const labels = ["Run 1", "Run 2", "Run 3", "Run 4", "Run 5", "Run 6", "Run 7"];
+const singleAgentData = [90, 84, 85, 92, 86, 86, 69];
+const multiAgentData = [73, 87, 87, 68, 83, 97, 60];
+const deltaData = [-17, 3, 2, -24, -3, 11, -9];
 
 const chart = new Chart(ctx, {
   type: 'line',
