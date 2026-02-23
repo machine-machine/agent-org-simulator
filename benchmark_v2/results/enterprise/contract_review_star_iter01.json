@@ -1,0 +1,39 @@
+{
+  "task_id": "contract_review",
+  "topology": "star",
+  "final_delta": 0.0,
+  "final_sa_score": 0.0,
+  "final_ma_score": 0.0,
+  "convergence_iter": 0,
+  "learning_rate": 0.0,
+  "converged": false,
+  "total_time_s": 0.0,
+  "org_memory": {
+    "synthesis_protocol": "CRITICAL: Specialists must output structured, specific content. Synthesis must preserve ALL concrete values verbatim \u2014 never replace specific numbers, schemas, or protocol names with abstract metaphors. If a specialist says 'timeout_ms: 500', synthesis must keep '500', not 'standard timeout'.",
+    "synthesis_truncation": "NEVER truncate specialist input for synthesis. A single synthesis call with full specialist input is better than split calls with truncated input. If the model hits token limits, retry with higher max_tokens.",
+    "domain_grounding": "All specialist prompts must include explicit domain grounding. LLMs pattern-match to their training data distribution \u2014 if the task mentions 'incident response', specialists will drift to cybersecurity. Always specify the actual domain context explicitly.",
+    "output_structure": "Multi-agent output must follow a consistent phase structure matching the task's required areas. Each required area must have a dedicated section. Specialists should output JSON with clearly labeled sections."
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "sa_score": 0.0,
+      "ma_score": 0.0,
+      "delta": 0.0,
+      "p_value": NaN,
+      "cohens_d": 0.0,
+      "sa_std": 0.0,
+      "ma_std": 0.0,
+      "failure_mode": "Unknown",
+      "protocol_fix": "Unknown",
+      "token_summary": {
+        "input_tokens": 5457,
+        "output_tokens": 16500,
+        "total_tokens": 21957,
+        "call_count": 6,
+        "cost_usd": 0.0429
+      },
+      "timestamp": "2026-02-23T08:25:31.317198"
+    }
+  ]
+}

@@ -1,0 +1,407 @@
+{
+  "code_review_protocol__star": {
+    "task_id": "code_review_protocol",
+    "topology": "star",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "code_review_protocol__hrm": {
+    "task_id": "code_review_protocol",
+    "topology": "hrm",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "code_review_protocol__self_decompose": {
+    "task_id": "code_review_protocol",
+    "topology": "self_decompose",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "code_review_execution__star": {
+    "task_id": "code_review_execution",
+    "topology": "star",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "code_review_execution__hrm": {
+    "task_id": "code_review_execution",
+    "topology": "hrm",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "code_review_execution__self_decompose": {
+    "task_id": "code_review_execution",
+    "topology": "self_decompose",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "ai_incident_response__star": {
+    "task_id": "ai_incident_response",
+    "topology": "star",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "ai_incident_response__hrm": {
+    "task_id": "ai_incident_response",
+    "topology": "hrm",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "ai_incident_response__self_decompose": {
+    "task_id": "ai_incident_response",
+    "topology": "self_decompose",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "support_triage_system__star": {
+    "task_id": "support_triage_system",
+    "topology": "star",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "support_triage_system__hrm": {
+    "task_id": "support_triage_system",
+    "topology": "hrm",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "support_triage_system__self_decompose": {
+    "task_id": "support_triage_system",
+    "topology": "self_decompose",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "contract_review__star": {
+    "task_id": "contract_review",
+    "topology": "star",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "contract_review__hrm": {
+    "task_id": "contract_review",
+    "topology": "hrm",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "contract_review__self_decompose": {
+    "task_id": "contract_review",
+    "topology": "self_decompose",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 0.0,
+        "ma_score": 0.0,
+        "delta": 0.0
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": false,
+    "convergence_iter": 3
+  }
+}

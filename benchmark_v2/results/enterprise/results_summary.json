@@ -1,0 +1,171 @@
+{
+  "generated_at": "2026-02-23T08:31:22.401982",
+  "benchmark": "MachineMachine BenchmarkSuite v2",
+  "conditions": [
+    {
+      "task_id": "code_review_protocol",
+      "topology": "star",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "code_review_protocol",
+      "topology": "hrm",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "code_review_protocol",
+      "topology": "self_decompose",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "code_review_execution",
+      "topology": "star",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "code_review_execution",
+      "topology": "hrm",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "code_review_execution",
+      "topology": "self_decompose",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "ai_incident_response",
+      "topology": "star",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "ai_incident_response",
+      "topology": "hrm",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "ai_incident_response",
+      "topology": "self_decompose",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "support_triage_system",
+      "topology": "star",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "support_triage_system",
+      "topology": "hrm",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "support_triage_system",
+      "topology": "self_decompose",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "contract_review",
+      "topology": "star",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "contract_review",
+      "topology": "hrm",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "contract_review",
+      "topology": "self_decompose",
+      "final_delta": 0.0,
+      "final_sa_score": 0.0,
+      "final_ma_score": 0.0,
+      "convergence_iter": 3,
+      "learning_rate": 0.0,
+      "converged": false,
+      "iterations": 3
+    }
+  ]
+}
