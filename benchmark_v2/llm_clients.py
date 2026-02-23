@@ -79,43 +79,32 @@ def cerebras_call(prompt: str, max_tokens: int = 2000) -> tuple[str, float]:
     return content, time.time() - t0
 
 
-# ── Anthropic Haiku (blind evaluator) ────────────────────────────────────────
+# ── Cerebras Evaluator (blind evaluator — different model family from generators) ─────────────
+# Generators use zai-glm-4.7. Evaluator uses qwen-3-235b to eliminate model-family bias.
 
-def load_anthropic_key() -> str:
-    cfg_path = os.path.expanduser("~/.config/anthropic/config")
-    if os.path.exists(cfg_path):
-        for line in open(cfg_path).read().splitlines():
-            if "ANTHROPIC_API_KEY" in line and "=" in line:
-                return line.split("=", 1)[1].strip().strip('"').strip("'")
-    key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if key:
-        return key
-    raise ValueError("Anthropic API key not found in ~/.config/anthropic/config or ANTHROPIC_API_KEY env")
+EVALUATOR_MODEL = "qwen-3-235b-a22b-instruct-2507"
 
-_ANTHROPIC_KEY = None
-
-def anthropic_call(prompt: str, max_tokens: int = 1000, system: str = "") -> tuple[str, float]:
-    global _ANTHROPIC_KEY
-    if _ANTHROPIC_KEY is None:
-        _ANTHROPIC_KEY = load_anthropic_key()
+def anthropic_call(prompt: str, max_tokens: int = 1200, system: str = "") -> tuple[str, float]:
+    """Evaluator call — uses Cerebras qwen-3-235b (different family from GLM-4.7 generators).
+    Named anthropic_call for backward compatibility with evaluator.py."""
     t0 = time.time()
-    body = {
-        "model": "claude-haiku-4-5",
-        "max_tokens": max_tokens,
-        "messages": [{"role": "user", "content": prompt}],
-    }
-    if system:
-        body["system"] = system
+    full_prompt = f"{system}\n\n{prompt}" if system else prompt
     resp = httpx.post(
-        "https://api.anthropic.com/v1/messages",
-        headers={
-            "x-api-key": _ANTHROPIC_KEY,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
+        "https://api.cerebras.ai/v1/chat/completions",
+        headers={"Authorization": f"Bearer {_CEREBRAS_KEY or load_cerebras_key()}", "Content-Type": "application/json"},
+        json={
+            "model": EVALUATOR_MODEL,
+            "messages": [{"role": "user", "content": full_prompt}],
+            "max_tokens": max_tokens,
+            "temperature": 0.1,  # low temp for consistent scoring
         },
-        json=body,
-        timeout=60,
+        timeout=120,
     )
     data = resp.json()
-    content = data["content"][0]["text"] if data.get("content") else ""
+    if "choices" not in data:
+        # Log the error for debugging
+        import sys
+        print(f"  [Evaluator ERROR] {data.get('error', data)}", file=sys.stderr)
+        return "", time.time() - t0
+    content = data["choices"][0]["message"].get("content", "")
     return content, time.time() - t0

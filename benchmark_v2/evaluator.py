@@ -1,6 +1,6 @@
 """
 BenchmarkSuite v2 — Blind Evaluator
-Uses Anthropic claude-haiku-4-5 (different model family from Cerebras generators).
+Uses Cerebras qwen-3-235b (different model family from GLM-4.7 generators).
 Runs n_runs evaluations with shuffled A/B labels to eliminate position bias.
 Returns statistical scores: mean, std, p-value, Cohen's d.
 """
@@ -18,6 +18,10 @@ except ImportError:
 
 @dataclass
 class DimensionScore:
+    """Dynamic dimension score container. Stores arbitrary rubric dimension scores."""
+    scores: dict = field(default_factory=dict)  # {dim_name: int}
+
+    # Legacy fixed fields for backward compat (populated if rubric matches default)
     coverage: int = 0
     technical_depth: int = 0
     coherence: int = 0
@@ -26,6 +30,8 @@ class DimensionScore:
 
     @property
     def total(self) -> int:
+        if self.scores:
+            return sum(self.scores.values())
         return self.coverage + self.technical_depth + self.coherence + self.implementability + self.edge_cases
 
 
@@ -87,66 +93,81 @@ class EvalResult:
 
 
 def _build_eval_prompt(output_a: str, output_b: str, task: Task) -> str:
+    # Use task-specific rubric if available, fall back to default
+    rubric = task.rubric if hasattr(task, 'rubric') and task.rubric else RUBRIC_DIMENSIONS
+    dim_names = [dim[0] for dim in rubric]
+
     rubric_lines = "\n".join(
-        f"{i+1}. {dim[0].upper().replace('_',' ')} (0-20): {dim[1]}"
-        for i, dim in enumerate(RUBRIC_DIMENSIONS)
+        f"{i+1}. {dim[0].upper().replace('_',' ')} (0-20 points): {dim[1]}"
+        for i, dim in enumerate(rubric)
     )
-    return f"""You are an expert technical evaluator. Rate two responses to this task:
 
-TASK: {task.prompt}
+    # Build expected score block with concrete format (no brackets)
+    score_template_a = "\n".join(f"A_{d}: <integer 0-20>" for d in dim_names)
+    score_template_b = "\n".join(f"B_{d}: <integer 0-20>" for d in dim_names)
 
-RUBRIC (score each 0-20, total 100):
+    return f"""You are an expert technical evaluator. Score two AI responses to this task independently.
+
+TASK:
+{task.prompt[:800]}
+
+SCORING RUBRIC — rate EACH dimension 0 to 20 (integers only):
 {rubric_lines}
 
+Maximum total = {len(rubric) * 20} points.
+
+---
 OUTPUT A:
-{output_a[:2000]}
+{output_a[:2500]}
 
+---
 OUTPUT B:
-{output_b[:2000]}
+{output_b[:2500]}
 
-Evaluate each output independently against the rubric. Think through each dimension carefully.
-Then provide your scores in this EXACT format at the END of your response:
+---
+INSTRUCTIONS:
+1. Evaluate A and B independently against EACH rubric dimension
+2. Give concrete reasons for each score (1-2 sentences per dimension)
+3. At the very END of your response, output ONLY the score block below — integers, no brackets, no ranges
 
-A_coverage: [0-20]
-A_technical_depth: [0-20]
-A_coherence: [0-20]
-A_implementability: [0-20]
-A_edge_cases: [0-20]
-A_total: [0-100]
-B_coverage: [0-20]
-B_technical_depth: [0-20]
-B_coherence: [0-20]
-B_implementability: [0-20]
-B_edge_cases: [0-20]
-B_total: [0-100]"""
+SCORE BLOCK (copy this exactly and fill integers):
+{score_template_a}
+A_total: <sum of A scores>
+{score_template_b}
+B_total: <sum of B scores>"""
 
 
-def _parse_scores(text: str, prefix: str) -> DimensionScore:
-    """Parse KEY: VALUE patterns from evaluator output. Uses LAST match (end of reasoning)."""
-    def extract(key):
-        pattern = rf'{re.escape(prefix)}_{re.escape(key)}:\s*(\d+)'
-        matches = list(re.finditer(pattern, text, re.IGNORECASE))
-        if matches:
-            try:
-                return int(matches[-1].group(1))
-            except:
-                pass
-        return 0
+def _extract_score(text: str, prefix: str, key: str) -> int:
+    """Extract a score value from evaluator text. Handles both '15' and '[15]' formats.
+    Uses the LAST match (end of text, after reasoning chain)."""
+    # Match: PREFIX_KEY: 15  OR  PREFIX_KEY: [15]  OR  PREFIX_KEY: 15/20
+    pattern = rf'{re.escape(prefix)}_{re.escape(key)}:\s*\[?(\d+)\]?'
+    matches = list(re.finditer(pattern, text, re.IGNORECASE))
+    if matches:
+        try:
+            val = int(matches[-1].group(1))
+            return max(0, min(100, val))  # clamp to sane range
+        except (ValueError, IndexError):
+            pass
+    return 0
 
-    dims = DimensionScore(
-        coverage=extract("coverage"),
-        technical_depth=extract("technical_depth"),
-        coherence=extract("coherence"),
-        implementability=extract("implementability"),
-        edge_cases=extract("edge_cases"),
-    )
-    # If individual dims parsed, compute total; else try to extract total directly
-    computed = dims.total
-    explicit_total = extract("total")
-    if explicit_total and abs(explicit_total - computed) > 10:
-        # Something weird — trust the sum of dimensions if they add up
-        pass
-    return dims
+
+def _parse_scores(text: str, prefix: str, dim_names: list[str] | None = None) -> DimensionScore:
+    """Parse dimension scores from evaluator output.
+    dim_names: list of dimension keys to extract (task-specific rubric).
+    Falls back to default RUBRIC_DIMENSIONS keys if not provided."""
+    if dim_names is None:
+        dim_names = [d[0] for d in RUBRIC_DIMENSIONS]
+
+    scores = {dim: _extract_score(text, prefix, dim) for dim in dim_names}
+
+    # Create DimensionScore with dynamic scores + legacy fields for default rubric
+    ds = DimensionScore(scores=scores)
+    # Populate legacy fields if they exist in this rubric
+    for field_name in ("coverage", "technical_depth", "coherence", "implementability", "edge_cases"):
+        if field_name in scores:
+            setattr(ds, field_name, scores[field_name])
+    return ds
 
 
 def evaluate_blind(
@@ -159,7 +180,7 @@ def evaluate_blind(
     """
     Blind evaluation: run n_runs times with shuffled A/B labels.
     This eliminates position bias (first-output advantage).
-    Uses claude-haiku-4-5 — different model family from Cerebras generators.
+    Uses Cerebras qwen-3-235b — different model family from GLM-4.7 generators.
     """
     result = EvalResult()
 
@@ -177,10 +198,16 @@ def evaluate_blind(
         if verbose:
             print(f"    [Evaluator run {run_i+1}/{n_runs}] {'SA=A, MA=B' if a_is_sa else 'SA=B, MA=A'}...")
 
-        eval_text, elapsed = anthropic_call(prompt, max_tokens=1200)
+        eval_text, elapsed = anthropic_call(prompt, max_tokens=2000)
 
-        a_scores = _parse_scores(eval_text, "A")
-        b_scores = _parse_scores(eval_text, "B")
+        rubric = task.rubric if hasattr(task, 'rubric') and task.rubric else RUBRIC_DIMENSIONS
+        dim_names = [d[0] for d in rubric]
+        a_scores = _parse_scores(eval_text, "A", dim_names)
+        b_scores = _parse_scores(eval_text, "B", dim_names)
+
+        if verbose and not any(v > 0 for v in a_scores.scores.values()):
+            print(f"    [WARN] All scores parsed as 0 — last 300 chars of response:")
+            print(f"    {repr(eval_text[-300:])}")
 
         if a_is_sa:
             sa_dim, ma_dim = a_scores, b_scores
