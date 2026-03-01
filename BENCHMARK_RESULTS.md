@@ -3,9 +3,10 @@
 **Model:** Cerebras zai-glm-4.7 — same model for all runs. Architecture is the isolated variable.
 
 
+
 ---
 
-## Evolution Summary (Auto-Updated: 2026-02-22 08:01 UTC)
+## Evolution Summary (Auto-Updated: 2026-03-01 08:01 UTC)
 
 | Run | Single Agent | Multi-Agent | Delta | Winner |
 |-----|-------------|-------------|-------|--------|
@@ -16,9 +17,10 @@
 | run_005 | 86/100 | 83/100 | -3 | 🏆 SA |
 | run_006 | 86/100 | 97/100 | +11 | 🏆 MA |
 | run_007 | 69/100 | 60/100 | -9 | 🏆 SA |
+| run_008 | 60/100 | 65/100 | +5 | 🏆 MA |
 
-**Runs completed:** 7  
-**Multi-agent improvement:** Delta went from -17 (run 1) → -9 (latest)  
+**Runs completed:** 8  
+**Multi-agent improvement:** Delta went from -17 (run 1) → +5 (latest)  
 **Self-evolution status:** ✅ CONFIRMED — org improved across runs
 
 📊 [View Improvement Curve](evolving_org/improvement_curve.html)  

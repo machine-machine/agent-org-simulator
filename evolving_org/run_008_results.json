@@ -1,0 +1,62 @@
+{
+  "run_id": "run_008",
+  "run_number": 8,
+  "timestamp": "2026-03-01T08:00:12.513533",
+  "single_agent": {
+    "output": "This architectural design outlines the **Resilient Autonomous Multi-Agent System (RAMAS)** protocol. It assumes a heterogenous fleet of 5 agents (Agent-01 through Agent-05) operating within a shared state environment, utilizing a vector database for memory and a message bus (e.g., Kafka or RabbitMQ) for communication.\n\n## System Architecture Overview\n*   **Agents:** Stateful LLM-powered units with specific capabilities (e.g., Planner, Coder, Researcher, Auditor, Executor).\n*   **State Manager:** A distributed ledger (e.g., etcd or Redis) tracking agent heartbeats, task locks, and global status.\n*   **Communication Fabric:** Pub/Sub asynchronous bus with Direct Message Reply (DMR) capabilities for synchronous requests.\n*   **Shared Memory:** Vector database serving as the collective \"brain\" of the organization.\n\n---\n\n### 1. Failure Detection Mechanisms\n\nDetection relies on a two-tiered approach: *Active Probing* (Hardware/System level) and *Semantic Monitoring* (Cognitive/Output level).\n\n#### A. The \"Pulse\" Protocol (Hardware/Connectivity)\nEvery agent runs a background thread (the `HeartbeatDaemon`) that updates the State Manager every **2 seconds**.\n```json\n{\n  \"agent_id\": \"Agent-03\",\n  \"timestamp\": 1715629200,\n  \"status\": \"ACTIVE\",\n  \"latency_ms\": 45,\n  \"queue_depth\": 4,\n  \"cpu_load\": 0.62,\n  \"hash_signature\": \"a7f3c9\" // Hash of last N instructions to detect stuck loops\n}\n```\n*   **T-Minus Warning:** If the State Manager misses a pulse for **6 seconds** (3 missed intervals), the agent is flagged as `DEGRADED`.\n*   **Failure Declaration:** If the pulse is missing for **15 seconds**, the agent is flagged as `TERMINATED`.\n\n#### B. Semantic Timeout (Cognitive Level)\nAgents assign a `max_execution_time` to every task delegated to another agent based on task complexity estimates.\n*   **Mechanism:** If Agent-01 delegates a task to Agent-02 and receives no `TASK_UPDATE` or `RESULT` within the estimated window, Agent-01 triggers a `PING_VERIFY`.\n*   **The \"Zombie\" Check:** If Agent-02 responds to `PING_VERIFY` with \"I am working\" but has not produced intermediate steps for > 2x the estimated time, the system classifies this as a **Semantic Crash** (e.g., infinite loop or hallucination loop) and forces a termination.\n\n#### C. Consensus Quorum\nTo prevent \"Split Brain\" (where a network partition makes remaining agents think a healthy agent is dead), a `DISENROLL` vote is triggered only if **3 out of 5** agents agree on the failure status.\n\n---\n\n### 2. Inter-Agent Communication During Incidents\n\nWhen a `DEGRADED` or `TERMINATED` state is detected, the Communication Fabric switches to **Panic Mode (Priority Channel 0)**.\n\n#### A. Priority Message Schemas\n Standard messages drop to low priority. Incident commands utilize specific schemas:\n\n**1. The `FLAG_FAILURE` Event:**\n*   **Broadcast By:** Agent Detecting Failure (or State Manager).\n*   **Payload:** `{ suspect_id: \"Agent-03\", reason: \"HEARTBEAT_TIMEOUT\", last_known_state: \"processing_task_id_X\" }`.\n\n**2. The `CLAIM_LOCK` Request:**\n*   **Purpose:** To prevent duplicate work during redistribution.\n*   **Payload:** `{ task_id: \"task_X\", claiming_agent: \"Agent-04\", intent: \"RECOVER\" }`.\n\n#### B. The Distributed Semaphore\nThe State Manager implements a lock key `global_incident_lock`.\n*   **Mechanism:** While an incident is active, agents cannot initiate *new* top-level goals. They must finish current sub-tasks or assist in recovery. This prevents the system from spiraling into chaos by starting new work while the workforce is depleted.\n\n#### C. The \"Black Box\" Buffer\nAll stdin/stdout and internal chain-of-thought logs for the failed agent are immediately dumped to the `Incident_Log` topic in the message bus for forensic capture, preventing data loss even if the agent container crashes.\n\n---\n\n### 3. Work Redistribution (Offboarding)\n\nRedistribution is handled by the **Work Redistribution Service (WRS)**, a logical process run by the remaining highest-seniority agent (determined by a static `seniority_rank` attribute).\n\n#### A. Task State Triage\nThe WRS queries the Shared Memory for the \"Task Graph\" of the failed agent. Tasks are categorized:\n1.  **COMMITTED:** Output generated. Action: Ignore.\n2.  **PENDING:** Not started. Action: Move back to Global Queue.\n3.  **IN_PROGRESS:** Partially done. Action: Rollback or Checkpoint Recovery.\n\n#### B. Rollback & Checkpointing\nIf a task was `IN_PROGRESS`, the WRS checks the `checkpoint_hash` in the State Manager.\n*   **If Checkpoint Exists:** The task is re-queued with `resume_from=checkpoint_hash`.\n*   **If No Checkpoint:** The task is re-queued with `mode=full_restart`. Dependent downstream tasks are recursively marked as `BLOCKED`.\n\n#### C. Dynamic Capability Matching\nThe surviving agents broadcast their current \"Free Capacity\" (percentage of available context window and compute). The WRS uses the **Hungarian Algorithm** for optimal assignment:\n*   Minimize: `Latency + Capability_Distance`.\n*   Constraint: Agent-05 (The \"Auditor\") cannot be assigned Agent-03's (The \"Coder\") tasks unless capability overlap allows, or unless the system is in `EMERGENCY_DEPLETION` mode (only 1 or 2 agents left alive).\n\n---\n\n### 4. Agent Recovery and Reintegration\n\nWhen a failed agent (e.g., Agent-03) comes back online, it does not immediately rejoin the workforce. It must pass through the **Sanitization Pipeline**.\n\n#### Phase 1: Quarantine & State Sync\n",
+    "time": 6.854445695877075,
+    "words": 747
+  },
+  "multi_agent": {
+    "specialists": [
+      {
+        "agent": "Systems Architect",
+        "words": 720,
+        "time": 7.3774638175964355
+      },
+      {
+        "agent": "Coordination Specialist",
+        "words": 574,
+        "time": 6.755005598068237
+      },
+      {
+        "agent": "Governance Designer",
+        "words": 706,
+        "time": 7.281975507736206
+      },
+      {
+        "agent": "Emergence Engineer",
+        "words": 755,
+        "time": 9.148733615875244
+      },
+      {
+        "agent": "Network Analyst",
+        "words": 751,
+        "time": 6.920845985412598
+      }
+    ],
+    "synthesis": "# Unified Incident Response Protocol (UIRP) v2.4\n**Classification:** Internal Engineering Specification\n**System ID:** ARC-5 / MAIR v2.4\n**Scope:** 5-Agent Autonomous Collective (Director, Architect, Builder, Runner, Watcher)\n\nThis protocol synthesizes architectural resilience, dynamic consensus, and post-incident learning into a unified response standard.\n\n---\n\n## 1. System Architecture & Transport\n\n### 1.1 Topology & Transport Layers\nWe utilize a hybrid approach to balance low-latency signaling with deep inspection capabilities.\n\n*   **Physical Topology:** Fully connected mesh via `WebSocket-over-SSL`.\n*   **Signaling Bus:** `NATS JetStream` (Persistent, At-Least-Once delivery).\n*   **Inspection Bus:** `gRPC` (Unary/Streaming).\n*   **Logical Overlay:** Hub-and-Spoke (Director\u4e3a\u4e2d\u5fc3) with a Token-Ring consensus overlay for critical decisions.\n\n### 1.2 Control Bus Specification\n*   **Protocol:** `NATS JetStream`.\n*   **Message Schema:** `StandardEnvelope` (Strict JSON Schema validation).\n*   **Topic Hierarchy:** `arc5.{agent_id}.{message_type}`.\n\n---\n\n## 2. Roles, Identity, and Governance\n\n### 2.1 Agent Role Mapping (Architectural ID $\\leftrightarrow$ Functional Role)\nTo satisfy both Architectural strictness and dynamic governance needs, roles are mapped as follows:\n\n| Architectural ID (SysArch) | Functional Role (Coord Spec) | Governance ID (Gov Des) | Primary Responsibility |\n| :--- | :--- | :--- | :--- |\n| **Director** | Coordinator (A5) | Variable | Orchestrator; Message routing; Deadlock breaking |\n| **Architect** | Analyst (A2) | Variable | Diagnosis; Parsing logs/drumps |\n| **Builder** | Engineer (A3) | Variable | Remediation; Code/Deploy execution |\n| **Runner** | Sentry (A1) | Variable | Monitoring; Telemetry ingestion; Triggers `INCIDENT_START` |\n| **Watcher** | Auditor (A4) | Variable | Verification; Safety checks; Holds `VETO_POWER` |\n\n*Note:* The *Sentinel* role (Governance L1) rotates every **1,000 epochs** via deterministic hash chain across these agents to prevent single-point-of-failure lockups.\n\n### 2.2 Authority Levels (MAIR v2.4)\nDecision making is tiered to prevent naive leader election failures.\n\n| Level | Name | Trigger | Quorum | Scope |\n| :--- | :--- | :--- | :--- | :--- |\n| **L0** | Self-Heal | Latency Jitter | None | Local retries, cache flush. |\n| **L1** | Sentinel Veto | Semantic Drift; Untrusted Sig | Single (Sentinel) | Pause target; Snapshot; Flag for L2. |\n| **L2** | Consensus Reconfigure | State Hash Divergence; L1 escalation | **3-of-5 BLS Multi-sig** | Routing updates; Process restarts. |\n| **L3** | HITL | Gateway Health discrepancy | Human Key + 1 Agent | Kernel stop; Full rollback. |\n| **L4** | Scuttle | Invalid Metadata Signature | Firmware | CPU Halt; Memory zeroization. |\n\n---\n\n## 3. Detection, Telemetry, and Health Monitoring\n\n### 3.1 Heartbeat Protocol (\"PULSE\")\n**Transport:** NATS JetStream.\n**Schema:** Protobuf binary envelope.\n\n```protobuf\nsyntax = \"proto3\";\npackage arc5.health;\n\nmessage Heartbeat {\n  string agent_id = 1;\n  uint64 epoch_ms = 2;\n  uint32 sequence = 3;\n  float cpu_load = 4;\n  float memory_usage = 5;\n  string status = 6;\n  map<string, double> metrics = 7;\n}\n```\n\n**Timing & Thresholds:**\n*   **Heartbeat Interval ($T_{interval}$):** 2,000 ms\n*   **Network Jitter ($T_{jitter}$):** 500 ms\n*   **Liveness Threshold ($T_{deadline}$):** 5,000 ms (Calculated: $2 \\times T_{interval} + T_{jitter}$). `> T_{deadline}` marks agent `DEGRADED`.\n*   **Failure Reclamation ($T_{reap}$):** 15,000 ms. Persistent `DEGRADED` state triggers `FAILED` marking and restart.\n\n**Episodic Extension:**\nThe `metrics` map must `log_importance_avg`. If `log_importance_avg > 0.8`, the `Watcher` triggers a gRPC \"High Priority Ping\".\n\n### 3.2 Deep Health Check (\"PROBE\")\n**URI:** `grpc://agent-{id}:50051/arc5.v1.Health/DeepCheck`\n**Timeout:** 3 seconds (Hard server-side deadline).\n\n**Three-Tier Logic:**\n1.  **Resource Locks:** Check mutexes (stale > 10s hold time = Fail).\n2.  **Dependencies:** Ping Vector DB, LLM API, Filesystem (Latency > 1s = Fail).\n3.  **State Validation:** Verify state machine not `UNKNOWN`/`PANIC`.\n\n**Process Check (Per Lesson 0.526):**\nExplicitly query subprocess manager. If child process running > 5 minutes without output, return `UNHEALTHY`.\n\n### 3.3 Metrics & Alerting (Network Analyst)\nInstrumentation is required for the Network Analyst dashboard.\n\n| Metric ID | Type | Threshold | Alert Action |\n| :--- | :--- | :--- | :--- |\n| `net.ingest.validation.fail` | Counter | `rate > 0.1` (5m) | `Schema_Guardrail_Review` |\n| `net.analysis.completeness` | Gauge | $< 1.0$ | Flag for \"",
+    "specialist_words": 3506,
+    "synthesis_words": 650,
+    "total_time": 45.70067358016968,
+    "parallel_time": 17.3653826713562
+  },
+  "scores": {
+    "A": {
+      "coverage": 6,
+      "depth": 17,
+      "coherence": 16,
+      "implementability": 12,
+      "edge_cases": 9,
+      "total": 60
+    },
+    "B": {
+      "coverage": 4,
+      "depth": 19,
+      "coherence": 18,
+      "implementability": 15,
+      "edge_cases": 9,
+      "total": 65
+    }
+  }
+}
