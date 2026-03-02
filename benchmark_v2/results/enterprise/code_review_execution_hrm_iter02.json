@@ -1,9 +1,9 @@
 {
   "task_id": "code_review_execution",
   "topology": "hrm",
-  "final_delta": 0.0,
-  "final_sa_score": 0.0,
-  "final_ma_score": 0.0,
+  "final_delta": 1.0,
+  "final_sa_score": 89.33333333333333,
+  "final_ma_score": 90.33333333333333,
   "convergence_iter": 0,
   "learning_rate": 0.0,
   "converged": false,
@@ -12,48 +12,52 @@
     "synthesis_protocol": "CRITICAL: Specialists must output structured, specific content. Synthesis must preserve ALL concrete values verbatim \u2014 never replace specific numbers, schemas, or protocol names with abstract metaphors. If a specialist says 'timeout_ms: 500', synthesis must keep '500', not 'standard timeout'.",
     "synthesis_truncation": "NEVER truncate specialist input for synthesis. A single synthesis call with full specialist input is better than split calls with truncated input. If the model hits token limits, retry with higher max_tokens.",
     "domain_grounding": "All specialist prompts must include explicit domain grounding. LLMs pattern-match to their training data distribution \u2014 if the task mentions 'incident response', specialists will drift to cybersecurity. Always specify the actual domain context explicitly.",
-    "output_structure": "Multi-agent output must follow a consistent phase structure matching the task's required areas. Each required area must have a dedicated section. Specialists should output JSON with clearly labeled sections."
+    "output_structure": "Multi-agent output must follow a consistent phase structure matching the task's required areas. Each required area must have a dedicated section. Specialists should output JSON with clearly labeled sections.",
+    "systems_architect": "[Iter 2] Should identify broader architectural patterns and integration risks, not individual function-level bugs",
+    "coordination_specialist": "[Iter 2] Must enforce non-overlapping scopes among specialists to prevent redundant analysis",
+    "governance_designer": "[Iter 2] Should focus on compliance and policy violations that other specialists typically miss",
+    "emergence_engineer": "[Iter 2] Must look for emergent interaction"
   },
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 0.0,
-      "ma_score": 0.0,
-      "delta": 0.0,
-      "p_value": NaN,
-      "cohens_d": 0.0,
-      "sa_std": 0.0,
-      "ma_std": 0.0,
+      "sa_score": 89.33333333333333,
+      "ma_score": 89.66666666666667,
+      "delta": 0.3333333333333428,
+      "p_value": 0.6666666666666667,
+      "cohens_d": 0.12309149097933622,
+      "sa_std": 2.3094010767585034,
+      "ma_std": 3.055050463303893,
       "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 8425,
-        "output_tokens": 17556,
-        "total_tokens": 25981,
+        "input_tokens": 8480,
+        "output_tokens": 18500,
+        "total_tokens": 26980,
         "call_count": 8,
-        "cost_usd": 0.0472
+        "cost_usd": 0.0495
       },
-      "timestamp": "2026-02-23T08:08:44.223983"
+      "timestamp": "2026-03-02T08:06:10.648598"
     },
     {
       "iteration": 2,
-      "sa_score": 0.0,
-      "ma_score": 0.0,
-      "delta": 0.0,
-      "p_value": NaN,
-      "cohens_d": 0.0,
-      "sa_std": 0.0,
-      "ma_std": 0.0,
-      "failure_mode": "Unknown",
-      "protocol_fix": "Unknown",
+      "sa_score": 89.33333333333333,
+      "ma_score": 90.33333333333333,
+      "delta": 1.0,
+      "p_value": 0.42264973081037427,
+      "cohens_d": 1.0954451150103321,
+      "sa_std": 1.1547005383792517,
+      "ma_std": 0.5773502691896257,
+      "failure_mode": "Multi-agent system achieved only marginal improvement over single agent because specialists produced overlapping coverage of the same obvious SQL injection bugs rather than discovering distinct issues.",
+      "protocol_fix": "Assign each specialist a unique inspection dimension (e.g., injection vulnerabilities, type safety, API compatibility, query performance, error handling) and require them to only report findings within their assigned domain to eliminate overlap.",
       "token_summary": {
-        "input_tokens": 14870,
-        "output_tokens": 31342,
-        "total_tokens": 46212,
-        "call_count": 14,
-        "cost_usd": 0.0841
+        "input_tokens": 8472,
+        "output_tokens": 17977,
+        "total_tokens": 26449,
+        "call_count": 8,
+        "cost_usd": 0.0482
       },
-      "timestamp": "2026-02-23T08:09:57.190057"
+      "timestamp": "2026-03-02T08:07:06.063430"
     }
   ]
 }

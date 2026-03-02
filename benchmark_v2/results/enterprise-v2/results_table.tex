@@ -1,0 +1,16 @@
+\begin{table}[h]
+\centering
+\caption{BenchmarkSuite v2: Final Scores by Task and Topology (mean $\pm$ std). 
+MA variants use blind Anthropic claude-haiku-4-5 evaluator. $^*$p$<$0.05, $^{**}$p$<$0.01 vs.\ Single Agent.}
+\label{tab:benchmark_v2}
+\begin{tabular}{lcccc}
+\toprule
+Method & code_review_protocol & contract_review & support_triage_system & Mean $\pm$ $\sigma$ \\
+\midrule
+Single Agent (SA) & 86.0 & 81.3 & 81.0 & 82.8 $\pm$ 2.3 \\
+MA-Star & 79.0$^{*}$ & 97.7$^{*}$ & 91.7$^{**}$ & 89.4 $\pm$ 7.8 \\
+MA-Pipeline & — & — & — & — \\
+MA-PeerReview & — & — & — & — \\
+\bottomrule
+\end{tabular}
+\end{table}

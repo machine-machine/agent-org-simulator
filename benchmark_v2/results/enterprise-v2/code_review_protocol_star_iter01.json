@@ -1,12 +1,12 @@
 {
   "task_id": "code_review_protocol",
-  "topology": "hrm",
-  "final_delta": 15.0,
-  "final_sa_score": 76.33333333333333,
-  "final_ma_score": 91.33333333333333,
-  "convergence_iter": 1,
+  "topology": "star",
+  "final_delta": -12.0,
+  "final_sa_score": 88.66666666666667,
+  "final_ma_score": 76.66666666666667,
+  "convergence_iter": 0,
   "learning_rate": 0.0,
-  "converged": true,
+  "converged": false,
   "total_time_s": 0.0,
   "org_memory": {
     "synthesis_protocol": "CRITICAL: Specialists must output structured, specific content. Synthesis must preserve ALL concrete values verbatim \u2014 never replace specific numbers, schemas, or protocol names with abstract metaphors. If a specialist says 'timeout_ms: 500', synthesis must keep '500', not 'standard timeout'.",
@@ -17,23 +17,23 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 76.33333333333333,
-      "ma_score": 91.33333333333333,
-      "delta": 15.0,
-      "p_value": 0.01021179201718677,
-      "cohens_d": 3.2101936875288977,
-      "sa_std": 4.163331998932265,
-      "ma_std": 5.131601439446884,
-      "failure_mode": "converged",
-      "protocol_fix": "",
+      "sa_score": 88.66666666666667,
+      "ma_score": 76.66666666666667,
+      "delta": -12.0,
+      "p_value": 0.07601139578917834,
+      "cohens_d": -3.488411398402867,
+      "sa_std": 1.5275252316519468,
+      "ma_std": 4.618802153517006,
+      "failure_mode": "Unknown",
+      "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 6520,
-        "output_tokens": 18489,
-        "total_tokens": 25009,
-        "call_count": 8,
-        "cost_usd": 0.0483
+        "input_tokens": 4231,
+        "output_tokens": 16500,
+        "total_tokens": 20731,
+        "call_count": 6,
+        "cost_usd": 0.0421
       },
-      "timestamp": "2026-03-02T08:02:13.363553"
+      "timestamp": "2026-02-23T09:10:01.486086"
     }
   ]
 }

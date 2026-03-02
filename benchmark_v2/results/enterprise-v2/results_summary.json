@@ -1,0 +1,105 @@
+{
+  "generated_at": "2026-02-23T09:21:59.835028",
+  "benchmark": "MachineMachine BenchmarkSuite v2",
+  "conditions": [
+    {
+      "task_id": "contract_review",
+      "topology": "star",
+      "final_delta": 16.33,
+      "final_sa_score": 81.33,
+      "final_ma_score": 97.67,
+      "convergence_iter": 1,
+      "learning_rate": 0.0,
+      "converged": true,
+      "iterations": 1
+    },
+    {
+      "task_id": "contract_review",
+      "topology": "hrm",
+      "final_delta": 22.67,
+      "final_sa_score": 75.33,
+      "final_ma_score": 98.0,
+      "convergence_iter": 3,
+      "learning_rate": 41.833,
+      "converged": true,
+      "iterations": 3
+    },
+    {
+      "task_id": "contract_review",
+      "topology": "self_decompose",
+      "final_delta": 1.0,
+      "final_sa_score": 93.0,
+      "final_ma_score": 94.0,
+      "convergence_iter": 3,
+      "learning_rate": 1.167,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "code_review_protocol",
+      "topology": "star",
+      "final_delta": -7.0,
+      "final_sa_score": 86.0,
+      "final_ma_score": 79.0,
+      "convergence_iter": 3,
+      "learning_rate": 2.5,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "code_review_protocol",
+      "topology": "hrm",
+      "final_delta": 10.0,
+      "final_sa_score": 84.0,
+      "final_ma_score": 94.0,
+      "convergence_iter": 3,
+      "learning_rate": 1.167,
+      "converged": true,
+      "iterations": 3
+    },
+    {
+      "task_id": "code_review_protocol",
+      "topology": "self_decompose",
+      "final_delta": 3.67,
+      "final_sa_score": 86.67,
+      "final_ma_score": 90.33,
+      "convergence_iter": 3,
+      "learning_rate": 9.333,
+      "converged": false,
+      "iterations": 3
+    },
+    {
+      "task_id": "support_triage_system",
+      "topology": "star",
+      "final_delta": 10.67,
+      "final_sa_score": 81.0,
+      "final_ma_score": 91.67,
+      "convergence_iter": 3,
+      "learning_rate": 7.5,
+      "converged": true,
+      "iterations": 3
+    },
+    {
+      "task_id": "support_triage_system",
+      "topology": "hrm",
+      "final_delta": 15.67,
+      "final_sa_score": 78.33,
+      "final_ma_score": 94.0,
+      "convergence_iter": 2,
+      "learning_rate": 22.0,
+      "converged": true,
+      "iterations": 2
+    },
+    {
+      "task_id": "support_triage_system",
+      "topology": "self_decompose",
+      "final_delta": -1.0,
+      "final_sa_score": 90.0,
+      "final_ma_score": 89.0,
+      "convergence_iter": 3,
+      "learning_rate": 3.167,
+      "converged": false,
+      "iterations": 3
+    }
+  ]
+}

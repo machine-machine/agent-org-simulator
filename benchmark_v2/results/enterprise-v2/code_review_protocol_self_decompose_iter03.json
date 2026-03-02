@@ -1,0 +1,79 @@
+{
+  "task_id": "code_review_protocol",
+  "topology": "self_decompose",
+  "final_delta": 3.666666666666657,
+  "final_sa_score": 86.66666666666667,
+  "final_ma_score": 90.33333333333333,
+  "convergence_iter": 3,
+  "learning_rate": 0.0,
+  "converged": false,
+  "total_time_s": 0.0,
+  "org_memory": {
+    "synthesis_protocol": "CRITICAL: Specialists must output structured, specific content. Synthesis must preserve ALL concrete values verbatim \u2014 never replace specific numbers, schemas, or protocol names with abstract metaphors. If a specialist says 'timeout_ms: 500', synthesis must keep '500', not 'standard timeout'.",
+    "synthesis_truncation": "NEVER truncate specialist input for synthesis. A single synthesis call with full specialist input is better than split calls with truncated input. If the model hits token limits, retry with higher max_tokens.",
+    "domain_grounding": "All specialist prompts must include explicit domain grounding. LLMs pattern-match to their training data distribution \u2014 if the task mentions 'incident response', specialists will drift to cybersecurity. Always specify the actual domain context explicitly.",
+    "output_structure": "Multi-agent output must follow a consistent phase structure matching the task's required areas. Each required area must have a dedicated section. Specialists should output JSON with clearly labeled sections."
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "sa_score": 87.0,
+      "ma_score": 72.0,
+      "delta": -15.0,
+      "p_value": 0.001478197408234942,
+      "cohens_d": -4.8666426339228765,
+      "sa_std": 2.6457513110645907,
+      "ma_std": 3.4641016151377544,
+      "failure_mode": "Unknown",
+      "protocol_fix": "Unknown",
+      "token_summary": {
+        "input_tokens": 511,
+        "output_tokens": 4463,
+        "total_tokens": 4974,
+        "call_count": 2,
+        "cost_usd": 0.011
+      },
+      "timestamp": "2026-02-23T09:15:30.030398"
+    },
+    {
+      "iteration": 2,
+      "sa_score": 87.66666666666667,
+      "ma_score": 74.66666666666667,
+      "delta": -13.0,
+      "p_value": 0.0077973899361704815,
+      "cohens_d": -2.022055804724329,
+      "sa_std": 5.507570547286102,
+      "ma_std": 7.234178138070236,
+      "failure_mode": "**\n    *   The MA output isn't \"bad,\" but it lost precision compared to the SA. The SA specified \"Nx\", \"Self-hosted runners\", and \"3 minutes\" vs MA's \"10 minutes\".\n    *   However, looking closely at the prompt's constraint on synthesis: \"Synthesis must preserve ALL concrete values verbatim\".\n    *   The MA output shows a distinct change in the \"philosophy\" catchphrase and a slower timeout (10m vs 3m).\n    *   Crucially, the prompt asks to handle: \"1. Automated pre-review checks... 2. Review assignment logic... 3. Review quality standards...\"\n    *   The SA output covers point 1. The MA output covers point 1.\n    *   *Difference detection:* The SA seems more \"optimized/battle-hardened\" (3 mins, self-hosted). The MA is more generic (ubuntu-latest, 10 mins).\n    *   But wait, looking at the \"Existing Org Memory,\" it emphasizes \"synthesis_protocol\" and \"domain_grounding\".\n    *   The MA output likely suffered from **dilution of specific constraints** (like the 3-minute timeout or specific tooling choices like Nx/Turbo) during the synthesis process from multiple specialists.\n    *   Actually, the prompt shows the *full* SA output vs *full* MA output. In the MA output, the constraint \"10 minutes\" conflicts with the implicit need for speed in a \"3x daily shipping\" environment (urgency).\n    *   Let's look at the *synthesis* aspect. The MA output likely averaged out the urgency.\n    *   *Hypothesis:* The Multi-Agent system failed to maintain the strict, high-performance constraints (3min check time) and specific infrastructure choices (self-hosted vs standard) that the SA derived naturally. The MA output seems \"blurred.\"\n    *   *Refinement:* The SA explicitly listed \"Nx (Turborepo alternative)\". The MA just listed \"ArgoCD (Delivery)\". The SA had a specific \"Config Snippet\" path `.github/workflows/pr-li...`. The MA had `.github/workflows/pr-checks.yml`.\n    *   The failure is likely **oversimplification/abstraction**. The MA response lacks the specific \"edge\" or high-velocity optimization details (like self-hosted runners for determinism or the 3-minute hard limit) that make the SA answer superior for a *high-frequency* shipping scenario.\n\n4.  **Determine the ROOT_CAUSE:",
+      "protocol_fix": "Unknown",
+      "token_summary": {
+        "input_tokens": 511,
+        "output_tokens": 4119,
+        "total_tokens": 4630,
+        "call_count": 2,
+        "cost_usd": 0.0102
+      },
+      "timestamp": "2026-02-23T09:15:46.145035"
+    },
+    {
+      "iteration": 3,
+      "sa_score": 86.66666666666667,
+      "ma_score": 90.33333333333333,
+      "delta": 3.666666666666657,
+      "p_value": 0.5942588875401753,
+      "cohens_d": 0.7013343843696704,
+      "sa_std": 3.7859388972001824,
+      "ma_std": 6.350852961085883,
+      "failure_mode": "converged",
+      "protocol_fix": "",
+      "token_summary": {
+        "input_tokens": 4362,
+        "output_tokens": 12300,
+        "total_tokens": 16662,
+        "call_count": 5,
+        "cost_usd": 0.0321
+      },
+      "timestamp": "2026-02-23T09:16:20.491402"
+    }
+  ]
+}

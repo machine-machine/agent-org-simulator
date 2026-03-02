@@ -1,0 +1,227 @@
+{
+  "contract_review__star": {
+    "task_id": "contract_review",
+    "topology": "star",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 81.33333333333333,
+        "ma_score": 97.66666666666667,
+        "delta": 16.333333333333343
+      }
+    ],
+    "learning_rate": 0.0,
+    "converged": true,
+    "convergence_iter": 1
+  },
+  "contract_review__hrm": {
+    "task_id": "contract_review",
+    "topology": "hrm",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 93.0,
+        "ma_score": 32.0,
+        "delta": -61.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 95.33333333333333,
+        "ma_score": 25.0,
+        "delta": -70.33333333333333
+      },
+      {
+        "iter": 3,
+        "sa_score": 75.33333333333333,
+        "ma_score": 98.0,
+        "delta": 22.66666666666667
+      }
+    ],
+    "learning_rate": 41.833333333333336,
+    "converged": true,
+    "convergence_iter": 3
+  },
+  "contract_review__self_decompose": {
+    "task_id": "contract_review",
+    "topology": "self_decompose",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 93.0,
+        "ma_score": 91.66666666666667,
+        "delta": -1.3333333333333286
+      },
+      {
+        "iter": 2,
+        "sa_score": 90.0,
+        "ma_score": 95.0,
+        "delta": 5.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 93.0,
+        "ma_score": 94.0,
+        "delta": 1.0
+      }
+    ],
+    "learning_rate": 1.1666666666666643,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "code_review_protocol__star": {
+    "task_id": "code_review_protocol",
+    "topology": "star",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 88.66666666666667,
+        "ma_score": 76.66666666666667,
+        "delta": -12.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 86.33333333333333,
+        "ma_score": 87.66666666666667,
+        "delta": 1.3333333333333428
+      },
+      {
+        "iter": 3,
+        "sa_score": 86.0,
+        "ma_score": 79.0,
+        "delta": -7.0
+      }
+    ],
+    "learning_rate": 2.5,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "code_review_protocol__hrm": {
+    "task_id": "code_review_protocol",
+    "topology": "hrm",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 85.66666666666667,
+        "ma_score": 93.33333333333333,
+        "delta": 7.666666666666657
+      },
+      {
+        "iter": 2,
+        "sa_score": 91.66666666666667,
+        "ma_score": 87.66666666666667,
+        "delta": -4.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 84.0,
+        "ma_score": 94.0,
+        "delta": 10.0
+      }
+    ],
+    "learning_rate": 1.1666666666666714,
+    "converged": true,
+    "convergence_iter": 3
+  },
+  "code_review_protocol__self_decompose": {
+    "task_id": "code_review_protocol",
+    "topology": "self_decompose",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 87.0,
+        "ma_score": 72.0,
+        "delta": -15.0
+      },
+      {
+        "iter": 2,
+        "sa_score": 87.66666666666667,
+        "ma_score": 74.66666666666667,
+        "delta": -13.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 86.66666666666667,
+        "ma_score": 90.33333333333333,
+        "delta": 3.666666666666657
+      }
+    ],
+    "learning_rate": 9.333333333333329,
+    "converged": false,
+    "convergence_iter": 3
+  },
+  "support_triage_system__star": {
+    "task_id": "support_triage_system",
+    "topology": "star",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 90.0,
+        "ma_score": 85.66666666666667,
+        "delta": -4.333333333333329
+      },
+      {
+        "iter": 2,
+        "sa_score": 88.33333333333333,
+        "ma_score": 85.33333333333333,
+        "delta": -3.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 81.0,
+        "ma_score": 91.66666666666667,
+        "delta": 10.666666666666671
+      }
+    ],
+    "learning_rate": 7.5,
+    "converged": true,
+    "convergence_iter": 3
+  },
+  "support_triage_system__hrm": {
+    "task_id": "support_triage_system",
+    "topology": "hrm",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 96.66666666666667,
+        "ma_score": 90.33333333333333,
+        "delta": -6.333333333333343
+      },
+      {
+        "iter": 2,
+        "sa_score": 78.33333333333333,
+        "ma_score": 94.0,
+        "delta": 15.666666666666671
+      }
+    ],
+    "learning_rate": 22.000000000000014,
+    "converged": true,
+    "convergence_iter": 2
+  },
+  "support_triage_system__self_decompose": {
+    "task_id": "support_triage_system",
+    "topology": "self_decompose",
+    "iterations": [
+      {
+        "iter": 1,
+        "sa_score": 90.33333333333333,
+        "ma_score": 83.0,
+        "delta": -7.333333333333329
+      },
+      {
+        "iter": 2,
+        "sa_score": 85.0,
+        "ma_score": 94.0,
+        "delta": 9.0
+      },
+      {
+        "iter": 3,
+        "sa_score": 90.0,
+        "ma_score": 89.0,
+        "delta": -1.0
+      }
+    ],
+    "learning_rate": 3.1666666666666643,
+    "converged": false,
+    "convergence_iter": 3
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "task_id": "contract_review",
+  "topology": "hrm",
+  "final_delta": 22.66666666666667,
+  "final_sa_score": 75.33333333333333,
+  "final_ma_score": 98.0,
+  "convergence_iter": 3,
+  "learning_rate": 0.0,
+  "converged": true,
+  "total_time_s": 0.0,
+  "org_memory": {
+    "synthesis_protocol": "CRITICAL: Specialists must output structured, specific content. Synthesis must preserve ALL concrete values verbatim \u2014 never replace specific numbers, schemas, or protocol names with abstract metaphors. If a specialist says 'timeout_ms: 500', synthesis must keep '500', not 'standard timeout'.",
+    "synthesis_truncation": "NEVER truncate specialist input for synthesis. A single synthesis call with full specialist input is better than split calls with truncated input. If the model hits token limits, retry with higher max_tokens.",
+    "domain_grounding": "All specialist prompts must include explicit domain grounding. LLMs pattern-match to their training data distribution \u2014 if the task mentions 'incident response', specialists will drift to cybersecurity. Always specify the actual domain context explicitly.",
+    "output_structure": "Multi-agent output must follow a consistent phase structure matching the task's required areas. Each required area must have a dedicated section. Specialists should output JSON with clearly labeled sections."
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "sa_score": 93.0,
+      "ma_score": 32.0,
+      "delta": -61.0,
+      "p_value": 0.00026863667375254247,
+      "cohens_d": -49.806291436591295,
+      "sa_std": 1.7320508075688772,
+      "ma_std": 0.0,
+      "failure_mode": "Unknown",
+      "protocol_fix": "Unknown",
+      "token_summary": {
+        "input_tokens": 6315,
+        "output_tokens": 18500,
+        "total_tokens": 24815,
+        "call_count": 8,
+        "cost_usd": 0.0482
+      },
+      "timestamp": "2026-02-23T09:06:42.822337"
+    },
+    {
+      "iteration": 2,
+      "sa_score": 95.33333333333333,
+      "ma_score": 25.0,
+      "delta": -70.33333333333333,
+      "p_value": 8.983313513307333e-05,
+      "cohens_d": -29.545909772991006,
+      "sa_std": 2.8867513459481287,
+      "ma_std": 1.7320508075688772,
+      "failure_mode": "**\n\nThe MA output provided is meta-analysis of the prompt instructions (\"Analyze the Request\", \"Role: MachineMachine Synthesis Agent\"), not the actual task output (the contract review). It appears the system entered a \"thought loop\" or \"planning mode\" and never actually executed the generation content, or the \"Synthesis Agent\" thought its job was to acknowledge the role rather than synthesize the *contract*.\nHowever, looking at the *content* of the Meta Output, it lists \"Specialist 1\", \"Specialist 2\", etc. It seems the MA system failed to actually *produce* the final deliverable and instead outputted its internal plan or breakdown of the instructions.\nFurthermore, the \"FINAL SPECIALIST OUTPUTS\" section in the MA's own analysis notes that inputs were truncated. This suggests a data flow issue.\n\nBut the most glaring issue for an external user seeing this output is: **The output did not contain the contract analysis.** It contained analysis *of* the request.\nWhy? The prompt for the MA system (simulated here) likely confused the agent.\nThe MA output looks like it's treating the *prompt text itself* as the thing to be summarized/analyzed.\nActually, let's look at the \"FINAL SPECIALIST OUTPUTS\" part inside the MA output. It says: \"However, the 'FINAL SPECIALIST OUTPUTS' section only fully shows the GDPR & Privacy Counsel (final) and cuts off after...\"\nThis implies the MA agent was trying to synthesis *incomplete* inputs and hallucinated this commentary about the missing inputs?\nNo, looking at the \"MA OUTPUT\" block again:\n\"1. Analyze the Request... 3. Input Material: Loop History... Specialist 1... Specialist 2... *Note",
+      "protocol_fix": "Unknown",
+      "token_summary": {
+        "input_tokens": 6232,
+        "output_tokens": 18500,
+        "total_tokens": 24732,
+        "call_count": 8,
+        "cost_usd": 0.0481
+      },
+      "timestamp": "2026-02-23T09:07:33.355533"
+    },
+    {
+      "iteration": 3,
+      "sa_score": 75.33333333333333,
+      "ma_score": 98.0,
+      "delta": 22.66666666666667,
+      "p_value": 0.0060009114520335576,
+      "cohens_d": 10.492627797422253,
+      "sa_std": 3.055050463303893,
+      "ma_std": 0.0,
+      "failure_mode": "converged",
+      "protocol_fix": "",
+      "token_summary": {
+        "input_tokens": 6329,
+        "output_tokens": 18500,
+        "total_tokens": 24829,
+        "call_count": 8,
+        "cost_usd": 0.0482
+      },
+      "timestamp": "2026-02-23T09:08:21.426635"
+    }
+  ]
+}

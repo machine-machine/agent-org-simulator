@@ -1,0 +1,79 @@
+{
+  "task_id": "support_triage_system",
+  "topology": "self_decompose",
+  "final_delta": -1.0,
+  "final_sa_score": 90.0,
+  "final_ma_score": 89.0,
+  "convergence_iter": 3,
+  "learning_rate": 0.0,
+  "converged": false,
+  "total_time_s": 0.0,
+  "org_memory": {
+    "synthesis_protocol": "CRITICAL: Specialists must output structured, specific content. Synthesis must preserve ALL concrete values verbatim \u2014 never replace specific numbers, schemas, or protocol names with abstract metaphors. If a specialist says 'timeout_ms: 500', synthesis must keep '500', not 'standard timeout'.",
+    "synthesis_truncation": "NEVER truncate specialist input for synthesis. A single synthesis call with full specialist input is better than split calls with truncated input. If the model hits token limits, retry with higher max_tokens.",
+    "domain_grounding": "All specialist prompts must include explicit domain grounding. LLMs pattern-match to their training data distribution \u2014 if the task mentions 'incident response', specialists will drift to cybersecurity. Always specify the actual domain context explicitly.",
+    "output_structure": "Multi-agent output must follow a consistent phase structure matching the task's required areas. Each required area must have a dedicated section. Specialists should output JSON with clearly labeled sections."
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "sa_score": 90.33333333333333,
+      "ma_score": 83.0,
+      "delta": -7.333333333333329,
+      "p_value": 0.002059734421668183,
+      "cohens_d": -17.96292478040996,
+      "sa_std": 0.5773502691896257,
+      "ma_std": 0.0,
+      "failure_mode": "** What specific weakness caused MA to score lower?\n    *   The MA focused on defining data structures (schemas) instead of describing the functional workflow and system design requested. It prioritized data modeling over process flow.\n\n2.  **ROOT_CAUSE:** What is the underlying reason?\n    *   Likely \"Specialist Overlap\" or \"Abstraction instead of specifics.\" One agent (perhaps the Data Architect or Systems Architect, but given the JSON output, likely a data-focused role) took the lead or the synthesis got stuck on defining the \"objects\" before the \"functions.\" Or, the synthesis protocol collapsed into a database schema definition because agents returned structural data rather than procedural descriptions. The prompt explicitly says: \"NEVER replace specific numbers, schemas... with abstract metaphors,\" implying the agents might have been *too* specific on the wrong thing (schemas) or not focused enough on the requirement. Actually, looking at the existing org memory, it says \"Synthesis must preserve ALL concrete values verbatim.\" The MA output *has* concrete values in JSON, but it fails to answer the prompt's narrative requirements. It seems to be a case of **Specialist Overlap** where the definition of data objects eclipsed the functional design, or the synthesis failed to weave functional logic around the data structures provided. It looks like a \"Data-first\" bias.\n\n3.  **PROTOCOL_FIX:** One concrete change.\n    *   Require agents to produce functional flow descriptions *before* or *alongside* data schemas, or mandate that the output format aligns with the prompt's enumerated list (1, 2, 3...) rather than just dumping data schemas. The prompt asked for specific sections (Intake, Routing, Knowledge), and the SA output mapped to that. The MA output mapped to \"Data Architecture.\" The fix must force the system to answer the specific questions asked, not just a generic \"system spec\" starting with schemas.\n    *   Fix: Add a constraint to the synthesis protocol: \"The final output must strictly follow the numbered list structure provided in the user prompt; do not default to a 'Data Architecture' first format if the prompt asks for 'Intake & Classification' first.\"\n\n4.  **DOMAIN_GROUNDING:** Phrase to add.\n    *   The prompt mentions B2B SaaS support. The MA output is generic \"Customer Schema.\" The SA mentions \"PSTN ingestion,\" \"JS SDK.\"\n    *   Grounding: \"Context: B2B SaaS Support. Prioritize functional workflows (Intake -> Routing -> Resolution) over static data modeling.\"\n\n5.  **MEMORY_LESSONS:**\n    *   Systems Architect: Don't just dump schemas; describe the *flow*.\n    *   Coordination Specialist: Ensure the output structure matches the input prompt's structure.\n    *   Governance Designer: ... (Need to infer lessons based on the failure).\n    *   Emergence Engineer: ...\n    *   Network Analyst: ...\n    *   Synthesis Protocol: Don't get stuck on the first/lowest common denominator (data) if higher-order logic is requested (system design).\n\nLet's refine the failure mode. The MA output provided a \"System Specification\" starting with Data Architecture. The prompt asked for \"Intake & classification",
+      "protocol_fix": "** One concrete change.\n    *   Require agents to produce functional flow descriptions *before* or *alongside* data schemas, or mandate that the output format aligns with the prompt's enumerated list (1, 2, 3...) rather than just dumping data schemas. The prompt asked for specific sections (Intake, Routing, Knowledge), and the SA output mapped to that. The MA output mapped to \"Data Architecture.\" The fix must force the system to answer the specific questions asked, not just a generic \"system spec\" starting with schemas.\n    *   Fix: Add a constraint to the synthesis protocol: \"The final output must strictly follow the numbered list structure provided in the user prompt; do not default to a 'Data Architecture' first format if the prompt asks for 'Intake & Classification' first.\"\n\n4.  **DOMAIN_GROUNDING:** Phrase to add.\n    *   The prompt mentions B2B SaaS support. The MA output is generic \"Customer Schema.\" The SA mentions \"PSTN ingestion,\" \"JS SDK.\"\n    *   Grounding: \"Context: B2B SaaS Support. Prioritize functional workflows (Intake -> Routing -> Resolution) over static data modeling.\"\n\n5.  **MEMORY_LESSONS:**\n    *   Systems Architect: Don't just dump schemas; describe the *flow*.\n    *   Coordination Specialist: Ensure the output structure matches the input prompt's structure.\n    *   Governance Designer: ... (Need to infer lessons based on the failure).\n    *   Emergence Engineer: ...\n    *   Network Analyst: ...\n    *   Synthesis Protocol: Don't get stuck on the first/lowest common denominator (data) if higher-order logic is requested (system design).\n\nLet's refine the failure mode. The MA output provided a \"System Specification\" starting with Data Architecture. The prompt asked for \"Intake & classification",
+      "token_summary": {
+        "input_tokens": 483,
+        "output_tokens": 4707,
+        "total_tokens": 5190,
+        "call_count": 2,
+        "cost_usd": 0.0116
+      },
+      "timestamp": "2026-02-23T09:20:59.940127"
+    },
+    {
+      "iteration": 2,
+      "sa_score": 85.0,
+      "ma_score": 94.0,
+      "delta": 9.0,
+      "p_value": 0.012121660092786868,
+      "cohens_d": 7.3484692283495345,
+      "sa_std": 1.7320508075688772,
+      "ma_std": 0.0,
+      "failure_mode": "Unknown",
+      "protocol_fix": "Unknown",
+      "token_summary": {
+        "input_tokens": 4203,
+        "output_tokens": 12300,
+        "total_tokens": 16503,
+        "call_count": 5,
+        "cost_usd": 0.032
+      },
+      "timestamp": "2026-02-23T09:21:37.139533"
+    },
+    {
+      "iteration": 3,
+      "sa_score": 90.0,
+      "ma_score": 89.0,
+      "delta": -1.0,
+      "p_value": 0.0,
+      "cohens_d": -1.0,
+      "sa_std": 0.0,
+      "ma_std": 0.0,
+      "failure_mode": "converged",
+      "protocol_fix": "",
+      "token_summary": {
+        "input_tokens": 1778,
+        "output_tokens": 7300,
+        "total_tokens": 9078,
+        "call_count": 3,
+        "cost_usd": 0.0186
+      },
+      "timestamp": "2026-02-23T09:21:59.834577"
+    }
+  ]
+}

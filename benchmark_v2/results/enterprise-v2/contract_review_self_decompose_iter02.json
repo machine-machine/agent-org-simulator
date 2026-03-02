@@ -1,0 +1,59 @@
+{
+  "task_id": "contract_review",
+  "topology": "self_decompose",
+  "final_delta": 5.0,
+  "final_sa_score": 90.0,
+  "final_ma_score": 95.0,
+  "convergence_iter": 0,
+  "learning_rate": 0.0,
+  "converged": false,
+  "total_time_s": 0.0,
+  "org_memory": {
+    "synthesis_protocol": "CRITICAL: Specialists must output structured, specific content. Synthesis must preserve ALL concrete values verbatim \u2014 never replace specific numbers, schemas, or protocol names with abstract metaphors. If a specialist says 'timeout_ms: 500', synthesis must keep '500', not 'standard timeout'.",
+    "synthesis_truncation": "NEVER truncate specialist input for synthesis. A single synthesis call with full specialist input is better than split calls with truncated input. If the model hits token limits, retry with higher max_tokens.",
+    "domain_grounding": "All specialist prompts must include explicit domain grounding. LLMs pattern-match to their training data distribution \u2014 if the task mentions 'incident response', specialists will drift to cybersecurity. Always specify the actual domain context explicitly.",
+    "output_structure": "Multi-agent output must follow a consistent phase structure matching the task's required areas. Each required area must have a dedicated section. Specialists should output JSON with clearly labeled sections."
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "sa_score": 93.0,
+      "ma_score": 91.66666666666667,
+      "delta": -1.3333333333333286,
+      "p_value": 0.7509708774541238,
+      "cohens_d": -0.31722063428725655,
+      "sa_std": 1.7320508075688772,
+      "ma_std": 5.686240703077327,
+      "failure_mode": "** Multi-agent synthesis produced a diluted, over-structured response that lacked the cohesive narrative flow and sharp, direct assessment of the Single Agent.\n    *   **ROOT_CAUSE:** **Redundancy and synthesis dilution.** Specialists likely generated overlapping legal content (GDPR touches SLAs, liability touches data), forcing the synthesizer to average or truncate distinct insights to fit a unified structure.\n    *   **PROTOCOL_FIX:** Enforce strict \"Aspect Segregation\" where specialists are assigned mutually exclusive *sections* of the contract (e.g., Specialist A: Clause 1-10, Specialist B: Clause 11-20) rather than distinct *topics* (GDPR vs SLAs) to avoid overlap and synthesis friction.\n    *   **DOMAIN_GROUNDING:** \"Jurisdiction: United States",
+      "protocol_fix": "** Enforce strict \"Aspect Segregation\" where specialists are assigned mutually exclusive *sections* of the contract (e.g., Specialist A: Clause 1-10, Specialist B: Clause 11-20) rather than distinct *topics* (GDPR vs SLAs) to avoid overlap and synthesis friction.\n    *   **DOMAIN_GROUNDING:** \"Jurisdiction: United States",
+      "token_summary": {
+        "input_tokens": 513,
+        "output_tokens": 4800,
+        "total_tokens": 5313,
+        "call_count": 2,
+        "cost_usd": 0.0118
+      },
+      "timestamp": "2026-02-23T09:08:39.231458"
+    },
+    {
+      "iteration": 2,
+      "sa_score": 90.0,
+      "ma_score": 95.0,
+      "delta": 5.0,
+      "p_value": 0.013072457560346513,
+      "cohens_d": 1.4142135623730951,
+      "sa_std": 3.605551275463989,
+      "ma_std": 3.4641016151377544,
+      "failure_mode": "What specific weakness caused MA to score only marginally higher than SA?**\nThe SA score is 90, MA is 95. The SA output looks quite solid on its own\u2014it identified high risks and structured the answer well. The MA output added specific clause language examples (\"Standard Clause Language Issues\") which is a \"value add,\" but arguably the SA covered the core risks well. The question asks why MA scored *only marginally higher*. This implies the MA didn't leverage its multi-agent nature to produce significantly deeper or broader insights than the SA. The SA mimicked the \"specialist\" behavior naturally (it simulated risk analysis well). The MA improvement seen in the snippet (specific bad clause language) is good but niche. The *marginal* improvement suggests the MA might be generating standard template responses rather than deeply specialized insights that a single capable model wouldn't also hallucinate or generate.\nHowever, looking at the provided text:",
+      "protocol_fix": "What ONE concrete change to the specialist",
+      "token_summary": {
+        "input_tokens": 513,
+        "output_tokens": 4314,
+        "total_tokens": 4827,
+        "call_count": 2,
+        "cost_usd": 0.0107
+      },
+      "timestamp": "2026-02-23T09:08:55.568299"
+    }
+  ]
+}

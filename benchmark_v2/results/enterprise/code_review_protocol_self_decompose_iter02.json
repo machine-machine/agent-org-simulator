@@ -1,12 +1,12 @@
 {
   "task_id": "code_review_protocol",
   "topology": "self_decompose",
-  "final_delta": 0.0,
-  "final_sa_score": 0.0,
-  "final_ma_score": 0.0,
-  "convergence_iter": 0,
+  "final_delta": 15.333333333333329,
+  "final_sa_score": 79.0,
+  "final_ma_score": 94.33333333333333,
+  "convergence_iter": 2,
   "learning_rate": 0.0,
-  "converged": false,
+  "converged": true,
   "total_time_s": 0.0,
   "org_memory": {
     "synthesis_protocol": "CRITICAL: Specialists must output structured, specific content. Synthesis must preserve ALL concrete values verbatim \u2014 never replace specific numbers, schemas, or protocol names with abstract metaphors. If a specialist says 'timeout_ms: 500', synthesis must keep '500', not 'standard timeout'.",
@@ -17,43 +17,43 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 0.0,
-      "ma_score": 0.0,
-      "delta": 0.0,
-      "p_value": NaN,
-      "cohens_d": 0.0,
-      "sa_std": 0.0,
-      "ma_std": 0.0,
+      "sa_score": 83.66666666666667,
+      "ma_score": 91.0,
+      "delta": 7.333333333333329,
+      "p_value": 0.46610747807208086,
+      "cohens_d": 1.005730705941487,
+      "sa_std": 5.507570547286102,
+      "ma_std": 8.717797887081348,
       "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
         "input_tokens": 511,
-        "output_tokens": 4800,
-        "total_tokens": 5311,
+        "output_tokens": 4411,
+        "total_tokens": 4922,
         "call_count": 2,
-        "cost_usd": 0.0118
+        "cost_usd": 0.0109
       },
-      "timestamp": "2026-02-23T08:05:35.968029"
+      "timestamp": "2026-03-02T08:02:31.300799"
     },
     {
       "iteration": 2,
-      "sa_score": 0.0,
-      "ma_score": 0.0,
-      "delta": 0.0,
-      "p_value": NaN,
-      "cohens_d": 0.0,
-      "sa_std": 0.0,
-      "ma_std": 0.0,
-      "failure_mode": "Unknown",
-      "protocol_fix": "Unknown",
+      "sa_score": 79.0,
+      "ma_score": 94.33333333333333,
+      "delta": 15.333333333333329,
+      "p_value": 0.0004722550440469304,
+      "cohens_d": 4.808917036101712,
+      "sa_std": 3.4641016151377544,
+      "ma_std": 2.8867513459481287,
+      "failure_mode": "converged",
+      "protocol_fix": "",
       "token_summary": {
-        "input_tokens": 511,
-        "output_tokens": 4439,
-        "total_tokens": 4950,
-        "call_count": 2,
-        "cost_usd": 0.011
+        "input_tokens": 4456,
+        "output_tokens": 12300,
+        "total_tokens": 16756,
+        "call_count": 5,
+        "cost_usd": 0.0322
       },
-      "timestamp": "2026-02-23T08:05:50.228119"
+      "timestamp": "2026-03-02T08:03:10.180903"
     }
   ]
 }

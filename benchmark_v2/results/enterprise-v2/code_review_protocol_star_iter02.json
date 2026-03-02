@@ -1,9 +1,9 @@
 {
-  "task_id": "code_review_execution",
+  "task_id": "code_review_protocol",
   "topology": "star",
-  "final_delta": -1.6666666666666572,
-  "final_sa_score": 95.33333333333333,
-  "final_ma_score": 93.66666666666667,
+  "final_delta": 1.3333333333333428,
+  "final_sa_score": 86.33333333333333,
+  "final_ma_score": 87.66666666666667,
   "convergence_iter": 0,
   "learning_rate": 0.0,
   "converged": false,
@@ -17,43 +17,43 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 90.0,
-      "ma_score": 93.66666666666667,
-      "delta": 3.6666666666666714,
-      "p_value": 0.053270737593742526,
-      "cohens_d": 1.3696601740023204,
-      "sa_std": 2.0,
-      "ma_std": 3.214550253664318,
+      "sa_score": 88.66666666666667,
+      "ma_score": 76.66666666666667,
+      "delta": -12.0,
+      "p_value": 0.07601139578917834,
+      "cohens_d": -3.488411398402867,
+      "sa_std": 1.5275252316519468,
+      "ma_std": 4.618802153517006,
       "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 9612,
-        "output_tokens": 14230,
-        "total_tokens": 23842,
+        "input_tokens": 4231,
+        "output_tokens": 16500,
+        "total_tokens": 20731,
         "call_count": 6,
-        "cost_usd": 0.0399
+        "cost_usd": 0.0421
       },
-      "timestamp": "2026-03-02T08:03:55.341643"
+      "timestamp": "2026-02-23T09:10:01.486086"
     },
     {
       "iteration": 2,
-      "sa_score": 95.33333333333333,
-      "ma_score": 93.66666666666667,
-      "delta": -1.6666666666666572,
-      "p_value": 0.1993592309745643,
-      "cohens_d": -1.0910894511799556,
-      "sa_std": 0.5773502691896257,
-      "ma_std": 2.081665999466133,
-      "failure_mode": "** The Multi-Agent output failed to provide the complete \"Suggested Fix\" code, specifically getting cut off during the solution for the `get_user_profile` function, and introduced a potentially distracting low-severity performance issue that wasn't present in the higher-scoring single agent output.\n    *Refinement:* Let's focus on the truncation/hallucination balance. The",
+      "sa_score": 86.33333333333333,
+      "ma_score": 87.66666666666667,
+      "delta": 1.3333333333333428,
+      "p_value": 0.8853863489877494,
+      "cohens_d": 0.1792442859792896,
+      "sa_std": 4.932882862316247,
+      "ma_std": 9.29157324317757,
+      "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 6444,
-        "output_tokens": 11932,
-        "total_tokens": 18376,
+        "input_tokens": 8657,
+        "output_tokens": 16500,
+        "total_tokens": 25157,
         "call_count": 6,
-        "cost_usd": 0.0325
+        "cost_usd": 0.0448
       },
-      "timestamp": "2026-03-02T08:04:33.014804"
+      "timestamp": "2026-02-23T09:11:38.801792"
     }
   ]
 }
