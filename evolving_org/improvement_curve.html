@@ -124,24 +124,24 @@
   </div>
 
   <div class="verdict">
-    ✅ Multi-agent org IMPROVED from run 1 to run 8 — self-evolving architecture confirmed
+    ✅ Multi-agent org IMPROVED from run 1 to run 9 — self-evolving architecture confirmed
   </div>
 
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-value neutral">8</div>
+      <div class="stat-value neutral">9</div>
       <div class="stat-label">Total Runs</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value neutral">60<span style="font-size:1rem">/100</span></div>
+      <div class="stat-value neutral">43<span style="font-size:1rem">/100</span></div>
       <div class="stat-label">Single Agent (latest)</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value neutral">65<span style="font-size:1rem">/100</span></div>
+      <div class="stat-value neutral">51<span style="font-size:1rem">/100</span></div>
       <div class="stat-label">Multi-Agent (latest)</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value positive">+5</div>
+      <div class="stat-value positive">+8</div>
       <div class="stat-label">Delta (multi − single)</div>
     </div>
   </div>
@@ -157,6 +157,7 @@
 <div class="amendment-item"><span class="amend-run">run_002</span><span class="amend-text">Consolidate Specialist Output</span></div>
 <div class="amendment-item"><span class="amend-run">run_007</span><span class="amend-text">Scribe Mode</span></div>
 <div class="amendment-item"><span class="amend-run">run_008</span><span class="amend-text">Semantic Priority Check</span></div>
+<div class="amendment-item"><span class="amend-run">run_009</span><span class="amend-text">Dynamic Pentad Framework</span></div>
   </div>
 
   <div class="footer">
@@ -167,10 +168,10 @@
 <script>
 const ctx = document.getElementById('improvementChart').getContext('2d');
 
-const labels = ["Run 1", "Run 2", "Run 3", "Run 4", "Run 5", "Run 6", "Run 7", "Run 8"];
-const singleAgentData = [90, 84, 85, 92, 86, 86, 69, 60];
-const multiAgentData = [73, 87, 87, 68, 83, 97, 60, 65];
-const deltaData = [-17, 3, 2, -24, -3, 11, -9, 5];
+const labels = ["Run 1", "Run 2", "Run 3", "Run 4", "Run 5", "Run 6", "Run 7", "Run 8", "Run 9"];
+const singleAgentData = [90, 84, 85, 92, 86, 86, 69, 60, 43];
+const multiAgentData = [73, 87, 87, 68, 83, 97, 60, 65, 51];
+const deltaData = [-17, 3, 2, -24, -3, 11, -9, 5, 8];
 
 const chart = new Chart(ctx, {
   type: 'line',
