@@ -1,9 +1,9 @@
 {
   "task_id": "ai_incident_response",
   "topology": "hrm",
-  "final_delta": 0.0,
-  "final_sa_score": 0.0,
-  "final_ma_score": 0.0,
+  "final_delta": -2.6666666666666714,
+  "final_sa_score": 86.66666666666667,
+  "final_ma_score": 84.0,
   "convergence_iter": 0,
   "learning_rate": 0.0,
   "converged": false,
@@ -17,23 +17,23 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 0.0,
-      "ma_score": 0.0,
-      "delta": 0.0,
-      "p_value": NaN,
-      "cohens_d": 0.0,
-      "sa_std": 0.0,
-      "ma_std": 0.0,
-      "failure_mode": "What specific weakness caused MA to score only marginally higher than SA?\nSince it's a tie at 0.0, and MA drifted to a specific domain (DeFi) that wasn't requested (it said \"5-agent AI organization\"), the failure is likely that the MA hallucinated a domain context (DeFi) or injected irrelevant specific details (transactions, chain height) rather than keeping it general to *AI* agents. Or perhaps the SA failed to be specific enough (truncated output), but the MA was *too* specific in the wrong direction (DeFi domain drift).\n\nHowever, looking at the scores (0.0 vs 0.0), the real failure is likely that the protocol generated was generic or off-topic enough to get a zero score. If the evaluator wanted a general software/AI protocol, the DeFi focus is a failure. If the evaluator wanted a generic architectural pattern",
+      "sa_score": 86.66666666666667,
+      "ma_score": 84.0,
+      "delta": -2.6666666666666714,
+      "p_value": 0.8599719915971991,
+      "cohens_d": -0.22979399584857083,
+      "sa_std": 12.701705922171767,
+      "ma_std": 10.392304845413264,
+      "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 4619,
+        "input_tokens": 4690,
         "output_tokens": 18500,
-        "total_tokens": 23119,
+        "total_tokens": 23190,
         "call_count": 8,
         "cost_usd": 0.0472
       },
-      "timestamp": "2026-02-23T08:15:23.733921"
+      "timestamp": "2026-03-09T08:21:04.128973"
     }
   ]
 }
