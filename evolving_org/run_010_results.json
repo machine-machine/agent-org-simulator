@@ -1,0 +1,62 @@
+{
+  "run_id": "run_010",
+  "run_number": 10,
+  "timestamp": "2026-03-15T08:00:06.307752",
+  "single_agent": {
+    "output": "**System Architecture Document:** Distributed Agent Incident Response Protocol (DAIRP)\n**Architecture Version:** 1.0\n**Target Organization:** Heterogeneous Multi-Agent System (5 Agents)\n**Status:** Production Ready\n\n---\n\n### 1.0 System Topology & Definitions\nTo ensure this protocol is technically specific, we first define the operational environment. The 5-agent organization operates on a **Shared State Bus** (e.g., Redis or Kafka) coupled with a **Vector Store** for semantic memory.\n\n*   **Agent Types:**\n    *   `A-Orch` (Orchestrator): Task delegation and lifecycle management.\n    *   `A-Proc1` & `A-Proc2` (Processors): Heavy computational/analysis workers.\n    *   `A-Int` (Interface): External API/Gateway interaction.\n    *   `A-Mon` (Monitor): Health observability and logging.\n\n*   **Communication Layer:** Asynchronous Pub/Sub with TCP Heartbeats.\n\n---\n\n### 2.0 Failure Detection Mechanisms\nWe utilize a \"Hybrid Vigilance\" approach, combining low-level system signals with high-level semantic logic.\n\n#### 2.1 Hardware/Transport Layer (The L1 Watchdog)\n*   **Heartbeat Protocol:** Every agent emits a `HEARTBEAT` signal via the Bus every $T_{hb}$ (e.g., 500ms).\n*   **Timeout Threshold ($T_{crit}$):** The Monitor Agent (`A-Mon`) maintains a dead man\u2019s switch. If a signal is missed for $3 \\times T_{hb}$, the agent is marked `Unresponsive`.\n*   **TCP Keep-Alives:** Underlying socket connections are set to drop if the peer resets, triggering an immediate `\u65ad\u5c42 (Fault)` event.\n\n#### 2.2 Logic/Semantic Layer (The L2 Watchdog)\n*   **Output Stagnation Detection:** If an agent is processing a task (state `Locked`) and the context window or token count does not change for $T_{stagnate}$ (e.g., 60s), `A-Mon` triggers a logical timeout.\n*   **Loop/Hallucination Detection:** `A-Orch` analyzes intermediate outputs. If an agent repeats similar logic patterns (high similarity score > 0.95 in vector space) over three consecutive turns without state progression, it is flagged as `Looping`.\n*   **Exception Signature Monitoring:** Any agent logging `FATAL` or `CRITICAL` stack traces automatically broadcasts a `PANIC_SIG` to the Bus.\n\n---\n\n### 3.0 Inter-Agent Communication During Incidents\nTo prevent broadcast storms and cascading failures, communication is strictly gated during incidents.\n\n#### 3.1 The \"Crisis Channel\" (Priority Queue)\nStandard operational traffic uses Topic `ops_general`. Upon detection of a `CRITICAL_FAILURE`, all agents switch to Topic `ops_crit`.\n*   **Message Schema (Protocol Buffers/JSON):**\n    ```json\n    {\n      \"msg_type\": \"INCIDENT_REPORT\",\n      \"severity\": \"SEV-1\",\n      \"agent_id\": \"A-Proc1\",\n      \"timestamp\": 1698XXXX,\n      \"checkpoint_vector\": \"sha256:...\", // Pointer to state before failure\n      \"diagnostic_dump\": \"...\",\n      \"election_vote\": null // Used if leader fails\n    }\n    ```\n\n#### 3.2 Gossip Protocol & Suppression\n*   **Immediate Ack:** Upon receiving an `INCIDENT_REPORT`, healthy agents must reply `ACK_RECEIVED` within 50ms.\n*   **Suppression Logic:** If `A-Orch` is already handling a failure for `A-Proc1`, and `A-Proc2` also detects it, `A-Proc2` suppresses its broadcast to \"keep the wire clean\" to avoid feedback loops.\n\n#### 3.3 Leadership Election (If `A-Orch` fails)\nIf `A-Orch` is the failed agent, the remaining agents initiate a **Bully Algorithm** or **Raft-consensus** quick vote.\n1.  `A-Mon` nominates the highest-ID available agent (e.g., `A-Proc1`) as `Acting-Orch`.\n2.  If no objections within 100ms, `Acting-Orch` takes over delegation duties.\n\n---\n\n### 4.0 Work Redistribution (Failover Logic)\nWhen an agent goes `OFFLINE`, in-flight tasks must be preserved or rerouted.\n\n#### 4.1 Checkpointing & Roll",
+    "time": 6.6181864738464355,
+    "words": 483
+  },
+  "multi_agent": {
+    "specialists": [
+      {
+        "agent": "Systems Architect",
+        "words": 888,
+        "time": 24.999364137649536
+      },
+      {
+        "agent": "Coordination Specialist",
+        "words": 784,
+        "time": 7.048875093460083
+      },
+      {
+        "agent": "Governance Designer",
+        "words": 668,
+        "time": 8.736579656600952
+      },
+      {
+        "agent": "Emergence Engineer",
+        "words": 465,
+        "time": 7.821253061294556
+      },
+      {
+        "agent": "Network Analyst",
+        "words": 837,
+        "time": 9.292495250701904
+      }
+    ],
+    "synthesis": "# Unified Incident Response Protocol (UIRP) v1.0\n**System Classification:** Critical Infrastructure Control Plane\n**Architecture:** 5-Agent Multi-Agent Cluster (Containerized via Kubernetes)\n**Transport Backbone:** gRPC (HTTP/2) & NATS JetStream\n**Status:** Final Synthesis\n\nThis protocol integrates five engineering disciplines (Architecture, Coordination, Governance, Resilience, Network Analysis) into a single executable standard. It governs detection, consensus-based resolution, secure execution, capacity redistribution, and post-incident learning.\n\n---\n\n## 1. Infrastructure Layer: Liveness & Health Specification\n*Combines Systems Architect infrastructure definitions with Emergence Engineer capacity monitoring.*\n\n### 1.1 Dual-Pulse Protocol\nTo satisfy both \"Process Running\" and \"Thread Unblocked\" verification alongside granular capacity redistribution, the system utilizes a dual-pulse strategy.\n\n| Pulse Type | Purpose | Transport | Frequency | Payload Format | Failure Logic |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| **Liveness Pulse** | Process scheduler verification (Zombie detection). | UDP (Datagram) via localhost loopback & NATS. | 1000ms (+/- 50ms jitter). | Protobuf (`Pulse` message - see 1.1.1). | 3 consecutive misses ($T_{rx}$ 1500ms) = `CRITICAL` failure. |\n| **Workload Telemetry** | Real-time capacity calculation & Load Balancing. | UDP gRPC (Bi-directional streaming). | 200ms ($f_{beat}$). | JSON Metric Emission (see 1.1.2). | If $T_{now} - T_{last\\_beat} > 3 \\cdot f_{beat}$ (600ms), agent marked `DEGRADED`. |\n\n#### 1.1.1 Liveness Payload (Protobuf)\n```protobuf\nmessage Pulse {\n    uint64 agent_id = 1;\n    uint64 sequence_num = 2; // Monotonically increasing\n    uint64 epoch_time_ms = 3; // NTP synchronized\n    float cpu_load_pct = 4;\n    float mem_heap_mb = 5;\n    Status state = 6; // IDLE, PROCESSING, BLOCKED\n}\n```\n*Logic:* If `sequence_num` validates arrival but `cpu_load_pct` is 99% and `state` is `PROCESSING` for > 60 seconds, flag `COMPUTE_STALL` (Soft Failure).\n\n#### 1.1.2 Capacity Payload (JSON)\n```json\n{\n  \"agent_id\": \"int\",\n  \"queue_depth\": \"int\",\n  \"last_5_latencies_ms\": \"[float, float, float, float, float]\",\n  \"load_score\": \"float\"\n}\n```\n*Logic:* Controller Agent calculates Score $S_i[t] = 0.2 \\cdot L_{avg}[t] + 0.8 \\cdot S_i[t-1]$.\n\n### 1.2 Application Health Checks\nAdheres to **gRPC Health Checking Protocol** (`grpc.health.v1.Health`).\n\n| Status Enum | Return Conditions |\n| :--- | :--- |\n| `SERVING` | Port 50051 listening; Model in VRAM; DB/Redis Latency < 10ms; GPU Temp < 85\u00b0C. |\n| `NOT_SERVING` | Model loading/unloading; CUDA OOM; Input Queue > 1000. |\n| `UNKNOWN` | Startup in progress (< 5s). |\n\n* **Check Frequency:** 200ms (via sidecar proxy).\n* **RPC Timeout:** 50ms (Hard disconnect).\n\n### 1.3 gRPC Deadline Propagation\nDistributed deadlines are strictly enforced to prevent cascading timeouts.\n\n| Method Type | Operation | Timeout Value | Failure Action |\n| :--- | :--- | :--- | :--- |\n| **FastPath** | Simple Query / State Lookups | 200ms | Fallback to Cache |\n| **MediumPath** | Tool Execution / Code Sandbox | 5,000ms (5s) | Kill Sandbox, Return Error |\n| **SlowPath** | LLM Inference / Generation | 30,000ms (30s) | Trigger Partial Response |\n| **Batch** | Vector DB Bulk Embedding | 120,000ms (120s) | Retry with next batch |\n\n*Rule:* If `Time_Remaining < 50ms` upon receipt, reject immediately with `DEADLINE_EXCEEDED`.\n\n---\n\n## 2. Coordination & Communication Layer\n*Integrates Coordination Specialist proto definitions with Systems Architect circuit breakers.*\n\n### 2.1 Message Standard (`coordination.proto`)\nAll inter-agent communication uses this envelope. Supports trace context via `trace_id` (UUIDv7).\n\n```protobuf\nmessage CoordinationEnvelope {\n    MessageHeader header = 1;\n    oneof payload {\n        IncidentAlert alert = 2;\n        DiagnosticRequest diagnostic_req = 3;\n        DiagnosticResult diagnostic_res = 4;\n        ActionProposal proposal = 5;\n        Vote vote = 6;\n        ExecutionCommand command = 7;\n        Heartbeat heartbeat = 8;\n    }\n}\n```\n\n### 2.2 Circuit Breaker Implementation\nPattern: **State-Machine (Closed -> Open -> Half-Open)**. Implemented client-side using `sentinel-golang` or `resilience4j`.\n\n| Parameter | Value |\n| :--- | :--- |\n| **Rolling Window** | 10,000ms (10s) |\n| **Failure Threshold** | 50% rate OR 5 consecutive errors. |\n| **Volume Threshold** | Min 10 requests in window. |\n| **Sleep Window (Open)** | 5,000ms (5s). |\n| **Half-Open Max Calls** | 3 concurrent requests. |\n\n*Trigger Events:* gRPC returns `Unavailable`, `DeadlineExceeded`, or `ResourceExhausted`.\n\n### 2.3 Weighted Quorum Consensus\nUsed for executing remediation actions involving data modification or service restart.\n\n| Agent Role | Vote Weight | Authority Scope |\n| :--- | :--- | :--- |\n| **Arbiter** | 0 (Coordinator) | God Mode (L5) |\n| **Analyst** | 2 votes | Domain authority on safety. |\n| **Fixer / Executor** | 1 vote | Domain authority on feasibility. |\n| **Sentinel** | 1 vote | Metric authority. |\n\n*Tie-Breaking:* In a deadlock, Arbiter votes \"Safety First\" (default NO).\n\n---\n\n## 3. Governance, Security & Audit\n*Directives from Governance Designer integrated with Escalation Logic.*\n\n### 3.1 Authority Levels & JWT Scopes\nAll actions require a signed JWT from the HSM (A-ARBITER).\n\n| Level | Scope Claim | Capabilities | Token TTL |\n| :--- | :--- | :--- | :--- |\n| **L0** | `read:sys` | Pull metrics, logs. | 60s |\n| **L1** | `write:config` | Non-disruptive config changes (env vars). | 30s |\n| **L2** | `ctrl:compute` | Scale pods, restart containers. | 15s |\n| **L3** | `admin:data` | Vacuum DB, snapshots. | 10s |\n| **L4** | `enforce:sec` | Drop IPs, ban IAM users. | 5s |\n| **L5** | `god:mode` | Cluster rollback, SIGKILL, HSM rotation. | 1s (Single Use) |\n\n*Constraint:* Access outside scope triggers `403 Forbidden` and L4 alert to A-FIREWALL.\n\n### 3.2 Audit & Ledger\nAll actions L1+ recorded to a CRDT Ledger.\n\n**Schema (Protobuf):**\n```protobuf\nmessage AuditEntry {\n  string tx_id = 1",
+    "specialist_words": 3642,
+    "synthesis_words": 898,
+    "total_time": 67.91560745239258,
+    "parallel_time": 35.01640439033508
+  },
+  "scores": {
+    "A": {
+      "coverage": 2,
+      "depth": 12,
+      "coherence": 5,
+      "implementability": 5,
+      "edge_cases": 3,
+      "total": 27
+    },
+    "B": {
+      "coverage": 5,
+      "depth": 19,
+      "coherence": 12,
+      "implementability": 10,
+      "edge_cases": 10,
+      "total": 56
+    }
+  }
+}
