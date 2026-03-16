@@ -1,9 +1,9 @@
 {
   "task_id": "code_review_execution",
   "topology": "star",
-  "final_delta": 4.333333333333329,
-  "final_sa_score": 89.0,
-  "final_ma_score": 93.33333333333333,
+  "final_delta": 3.0,
+  "final_sa_score": 60.0,
+  "final_ma_score": 63.0,
   "convergence_iter": 0,
   "learning_rate": 0.0,
   "converged": false,
@@ -17,43 +17,43 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 85.66666666666667,
-      "ma_score": 92.0,
-      "delta": 6.333333333333329,
-      "p_value": 0.25873940109117294,
-      "cohens_d": 1.465881824639872,
+      "sa_score": 90.66666666666667,
+      "ma_score": 93.66666666666667,
+      "delta": 3.0,
+      "p_value": 0.09546596626670913,
+      "cohens_d": 0.9566892062149212,
       "sa_std": 3.055050463303893,
-      "ma_std": 5.291502622129181,
+      "ma_std": 3.214550253664318,
       "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 7900,
-        "output_tokens": 14208,
-        "total_tokens": 22108,
+        "input_tokens": 5415,
+        "output_tokens": 14341,
+        "total_tokens": 19756,
         "call_count": 6,
-        "cost_usd": 0.0388
+        "cost_usd": 0.0377
       },
-      "timestamp": "2026-03-09T08:07:39.939965"
+      "timestamp": "2026-03-16T08:08:01.620048"
     },
     {
       "iteration": 2,
-      "sa_score": 89.0,
-      "ma_score": 93.33333333333333,
-      "delta": 4.333333333333329,
-      "p_value": 0.20441292022926402,
-      "cohens_d": 2.1228911104120853,
-      "sa_std": 1.7320508075688772,
-      "ma_std": 2.3094010767585034,
+      "sa_score": 60.0,
+      "ma_score": 63.0,
+      "delta": 3.0,
+      "p_value": 0.18849732879931091,
+      "cohens_d": 0.056308869142036214,
+      "sa_std": 51.96152422706632,
+      "ma_std": 54.56189146281496,
       "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 3006,
-        "output_tokens": 14926,
-        "total_tokens": 17932,
+        "input_tokens": 5760,
+        "output_tokens": 13855,
+        "total_tokens": 19615,
         "call_count": 6,
-        "cost_usd": 0.0376
+        "cost_usd": 0.0367
       },
-      "timestamp": "2026-03-09T08:08:39.115321"
+      "timestamp": "2026-03-16T08:09:00.130189"
     }
   ]
 }

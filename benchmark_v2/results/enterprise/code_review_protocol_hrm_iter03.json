@@ -1,9 +1,9 @@
 {
   "task_id": "code_review_protocol",
   "topology": "hrm",
-  "final_delta": 0.0,
-  "final_sa_score": 0.0,
-  "final_ma_score": 0.0,
+  "final_delta": -5.0,
+  "final_sa_score": 86.33333333333333,
+  "final_ma_score": 81.33333333333333,
   "convergence_iter": 3,
   "learning_rate": 0.0,
   "converged": false,
@@ -17,63 +17,63 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 0.0,
-      "ma_score": 0.0,
-      "delta": 0.0,
-      "p_value": NaN,
-      "cohens_d": 0.0,
-      "sa_std": 0.0,
-      "ma_std": 0.0,
+      "sa_score": 86.33333333333333,
+      "ma_score": 90.0,
+      "delta": 3.6666666666666714,
+      "p_value": 0.7323434594809004,
+      "cohens_d": 0.44907311951024986,
+      "sa_std": 7.571877794400366,
+      "ma_std": 8.717797887081348,
       "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 6555,
-        "output_tokens": 18500,
-        "total_tokens": 25055,
+        "input_tokens": 6432,
+        "output_tokens": 16667,
+        "total_tokens": 23099,
         "call_count": 8,
-        "cost_usd": 0.0483
+        "cost_usd": 0.0439
       },
-      "timestamp": "2026-02-23T08:03:24.014786"
+      "timestamp": "2026-03-16T08:02:50.463259"
     },
     {
       "iteration": 2,
-      "sa_score": 0.0,
-      "ma_score": 0.0,
-      "delta": 0.0,
-      "p_value": NaN,
-      "cohens_d": 0.0,
-      "sa_std": 0.0,
-      "ma_std": 0.0,
-      "failure_mode": "** The Multi-Agent system drifted into domain-specific language (DeFi) that was not part of the prompt requirements and failed to provide the concrete implementation logic for the latter sections of the prompt, instead offering high-level architectural descriptions.\n        *   *Refining:* The MA introduced hallucinated domain context (\"DeFi\") and prioritized high-level architectural abstractions (\"Fail-Fast philosophy\") over the specific requested workflows for reviewer routing and quality criteria.\n\n    *   **ROOT_CAUSE:** Specialist agents lacked strict domain grounding constraints, allowing the Systems Architect or Governance Designer to pattern-match \"high-velocity financial-grade code\" to \"DeFi,\" and the synthesis protocol failed to strip these hallucinations or enforce the \"hrm\" context. Also, synthesis favored architectural descriptions over the required concrete YAML/logic for sections 2 and 3.\n        *   *Refining:* Insufficient domain grounding allowed pattern matching to \"DeFi\" contexts, and the",
+      "sa_score": 86.33333333333333,
+      "ma_score": 88.0,
+      "delta": 1.6666666666666714,
+      "p_value": 0.8418070007079168,
+      "cohens_d": 0.2597621667330663,
+      "sa_std": 5.773502691896257,
+      "ma_std": 7.0,
+      "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 6563,
-        "output_tokens": 18072,
-        "total_tokens": 24635,
+        "input_tokens": 6634,
+        "output_tokens": 18265,
+        "total_tokens": 24899,
         "call_count": 8,
-        "cost_usd": 0.0473
+        "cost_usd": 0.0478
       },
-      "timestamp": "2026-02-23T08:04:09.899029"
+      "timestamp": "2026-03-16T08:03:49.912196"
     },
     {
       "iteration": 3,
-      "sa_score": 0.0,
-      "ma_score": 0.0,
-      "delta": 0.0,
-      "p_value": NaN,
-      "cohens_d": 0.0,
-      "sa_std": 0.0,
-      "ma_std": 0.0,
+      "sa_score": 86.33333333333333,
+      "ma_score": 81.33333333333333,
+      "delta": -5.0,
+      "p_value": 0.652475976571542,
+      "cohens_d": -0.5940885257860045,
+      "sa_std": 7.234178138070236,
+      "ma_std": 9.451631252505218,
       "failure_mode": "converged",
       "protocol_fix": "",
       "token_summary": {
-        "input_tokens": 12792,
-        "output_tokens": 32000,
-        "total_tokens": 44792,
-        "call_count": 14,
-        "cost_usd": 0.0845
+        "input_tokens": 6541,
+        "output_tokens": 18500,
+        "total_tokens": 25041,
+        "call_count": 8,
+        "cost_usd": 0.0483
       },
-      "timestamp": "2026-02-23T08:05:24.220261"
+      "timestamp": "2026-03-16T08:06:06.501936"
     }
   ]
 }

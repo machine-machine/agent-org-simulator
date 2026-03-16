@@ -1,9 +1,9 @@
 {
   "task_id": "ai_incident_response",
   "topology": "star",
-  "final_delta": 20.333333333333343,
-  "final_sa_score": 79.33333333333333,
-  "final_ma_score": 99.66666666666667,
+  "final_delta": 16.33333333333333,
+  "final_sa_score": 74.66666666666667,
+  "final_ma_score": 91.0,
   "convergence_iter": 1,
   "learning_rate": 0.0,
   "converged": true,
@@ -17,23 +17,23 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 79.33333333333333,
-      "ma_score": 99.66666666666667,
-      "delta": 20.333333333333343,
-      "p_value": 0.1510565292887302,
-      "cohens_d": 1.787941664369676,
-      "sa_std": 16.072751268321593,
-      "ma_std": 0.5773502691896257,
+      "sa_score": 74.66666666666667,
+      "ma_score": 91.0,
+      "delta": 16.33333333333333,
+      "p_value": 0.006598010190238123,
+      "cohens_d": 10.00208311636464,
+      "sa_std": 2.3094010767585034,
+      "ma_std": 0.0,
       "failure_mode": "converged",
       "protocol_fix": "",
       "token_summary": {
-        "input_tokens": 6024,
+        "input_tokens": 5985,
         "output_tokens": 16500,
-        "total_tokens": 22524,
+        "total_tokens": 22485,
         "call_count": 6,
         "cost_usd": 0.0432
       },
-      "timestamp": "2026-03-09T08:19:58.494515"
+      "timestamp": "2026-03-16T08:15:22.564658"
     }
   ]
 }

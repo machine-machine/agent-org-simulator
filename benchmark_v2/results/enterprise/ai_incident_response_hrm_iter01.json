@@ -1,9 +1,9 @@
 {
   "task_id": "ai_incident_response",
   "topology": "hrm",
-  "final_delta": -2.6666666666666714,
-  "final_sa_score": 86.66666666666667,
-  "final_ma_score": 84.0,
+  "final_delta": 2.3333333333333286,
+  "final_sa_score": 80.66666666666667,
+  "final_ma_score": 83.0,
   "convergence_iter": 0,
   "learning_rate": 0.0,
   "converged": false,
@@ -17,23 +17,23 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 86.66666666666667,
-      "ma_score": 84.0,
-      "delta": -2.6666666666666714,
-      "p_value": 0.8599719915971991,
-      "cohens_d": -0.22979399584857083,
-      "sa_std": 12.701705922171767,
-      "ma_std": 10.392304845413264,
+      "sa_score": 80.66666666666667,
+      "ma_score": 83.0,
+      "delta": 2.3333333333333286,
+      "p_value": 0.9176584547885984,
+      "cohens_d": 0.13291804805800164,
+      "sa_std": 17.7857620959388,
+      "ma_std": 17.320508075688775,
       "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 4690,
+        "input_tokens": 4710,
         "output_tokens": 18500,
-        "total_tokens": 23190,
+        "total_tokens": 23210,
         "call_count": 8,
         "cost_usd": 0.0472
       },
-      "timestamp": "2026-03-09T08:21:04.128973"
+      "timestamp": "2026-03-16T08:16:16.583283"
     }
   ]
 }
