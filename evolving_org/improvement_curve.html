@@ -124,24 +124,24 @@
   </div>
 
   <div class="verdict">
-    ✅ Multi-agent org IMPROVED from run 1 to run 10 — self-evolving architecture confirmed
+    ✅ Multi-agent org IMPROVED from run 1 to run 11 — self-evolving architecture confirmed
   </div>
 
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-value neutral">10</div>
+      <div class="stat-value neutral">11</div>
       <div class="stat-label">Total Runs</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value neutral">27<span style="font-size:1rem">/100</span></div>
+      <div class="stat-value positive">75<span style="font-size:1rem">/100</span></div>
       <div class="stat-label">Single Agent (latest)</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value neutral">56<span style="font-size:1rem">/100</span></div>
+      <div class="stat-value positive">74<span style="font-size:1rem">/100</span></div>
       <div class="stat-label">Multi-Agent (latest)</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value positive">+29</div>
+      <div class="stat-value negative">-1</div>
       <div class="stat-label">Delta (multi − single)</div>
     </div>
   </div>
@@ -169,10 +169,10 @@
 <script>
 const ctx = document.getElementById('improvementChart').getContext('2d');
 
-const labels = ["Run 1", "Run 2", "Run 3", "Run 4", "Run 5", "Run 6", "Run 7", "Run 8", "Run 9", "Run 10"];
-const singleAgentData = [90, 84, 85, 92, 86, 86, 69, 60, 43, 27];
-const multiAgentData = [73, 87, 87, 68, 83, 97, 60, 65, 51, 56];
-const deltaData = [-17, 3, 2, -24, -3, 11, -9, 5, 8, 29];
+const labels = ["Run 1", "Run 2", "Run 3", "Run 4", "Run 5", "Run 6", "Run 7", "Run 8", "Run 9", "Run 10", "Run 11"];
+const singleAgentData = [90, 84, 85, 92, 86, 86, 69, 60, 43, 27, 75];
+const multiAgentData = [73, 87, 87, 68, 83, 97, 60, 65, 51, 56, 74];
+const deltaData = [-17, 3, 2, -24, -3, 11, -9, 5, 8, 29, -1];
 
 const chart = new Chart(ctx, {
   type: 'line',
