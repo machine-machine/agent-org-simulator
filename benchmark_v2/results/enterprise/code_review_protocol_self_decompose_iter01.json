@@ -2,8 +2,8 @@
   "task_id": "code_review_protocol",
   "topology": "self_decompose",
   "final_delta": 10.333333333333329,
-  "final_sa_score": 80.66666666666667,
-  "final_ma_score": 91.0,
+  "final_sa_score": 80.0,
+  "final_ma_score": 90.33333333333333,
   "convergence_iter": 1,
   "learning_rate": 0.0,
   "converged": true,
@@ -17,23 +17,23 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 80.66666666666667,
-      "ma_score": 91.0,
+      "sa_score": 80.0,
+      "ma_score": 90.33333333333333,
       "delta": 10.333333333333329,
-      "p_value": 0.025041531230219554,
-      "cohens_d": 4.783403848824848,
-      "sa_std": 2.516611478423583,
-      "ma_std": 1.7320508075688772,
+      "p_value": 0.13988381829231233,
+      "cohens_d": 2.101996861224511,
+      "sa_std": 6.928203230275509,
+      "ma_std": 0.5773502691896257,
       "failure_mode": "converged",
       "protocol_fix": "",
       "token_summary": {
-        "input_tokens": 3861,
-        "output_tokens": 12300,
-        "total_tokens": 16161,
+        "input_tokens": 4484,
+        "output_tokens": 12165,
+        "total_tokens": 16649,
         "call_count": 5,
-        "cost_usd": 0.0318
+        "cost_usd": 0.0319
       },
-      "timestamp": "2026-03-16T08:06:47.984844"
+      "timestamp": "2026-03-23T08:07:43.249629"
     }
   ]
 }

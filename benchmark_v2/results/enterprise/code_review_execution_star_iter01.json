@@ -1,9 +1,9 @@
 {
   "task_id": "code_review_execution",
   "topology": "star",
-  "final_delta": 3.0,
-  "final_sa_score": 90.66666666666667,
-  "final_ma_score": 93.66666666666667,
+  "final_delta": 5.666666666666657,
+  "final_sa_score": 87.66666666666667,
+  "final_ma_score": 93.33333333333333,
   "convergence_iter": 0,
   "learning_rate": 0.0,
   "converged": false,
@@ -17,23 +17,23 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 90.66666666666667,
-      "ma_score": 93.66666666666667,
-      "delta": 3.0,
-      "p_value": 0.09546596626670913,
-      "cohens_d": 0.9566892062149212,
-      "sa_std": 3.055050463303893,
-      "ma_std": 3.214550253664318,
+      "sa_score": 87.66666666666667,
+      "ma_score": 93.33333333333333,
+      "delta": 5.666666666666657,
+      "p_value": 0.17343171484526415,
+      "cohens_d": 2.346222901764,
+      "sa_std": 2.5166114784235836,
+      "ma_std": 2.3094010767585034,
       "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 5415,
-        "output_tokens": 14341,
-        "total_tokens": 19756,
+        "input_tokens": 2441,
+        "output_tokens": 9788,
+        "total_tokens": 12229,
         "call_count": 6,
-        "cost_usd": 0.0377
+        "cost_usd": 0.025
       },
-      "timestamp": "2026-03-16T08:08:01.620048"
+      "timestamp": "2026-03-23T08:08:15.662085"
     }
   ]
 }

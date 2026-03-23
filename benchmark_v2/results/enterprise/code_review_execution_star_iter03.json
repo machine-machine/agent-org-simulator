@@ -1,9 +1,9 @@
 {
   "task_id": "code_review_execution",
   "topology": "star",
-  "final_delta": 8.666666666666671,
-  "final_sa_score": 86.33333333333333,
-  "final_ma_score": 95.0,
+  "final_delta": 7.0,
+  "final_sa_score": 85.0,
+  "final_ma_score": 92.0,
   "convergence_iter": 3,
   "learning_rate": 0.0,
   "converged": false,
@@ -17,63 +17,63 @@
   "iterations": [
     {
       "iteration": 1,
-      "sa_score": 90.66666666666667,
-      "ma_score": 93.66666666666667,
-      "delta": 3.0,
-      "p_value": 0.09546596626670913,
-      "cohens_d": 0.9566892062149212,
-      "sa_std": 3.055050463303893,
-      "ma_std": 3.214550253664318,
+      "sa_score": 87.66666666666667,
+      "ma_score": 93.33333333333333,
+      "delta": 5.666666666666657,
+      "p_value": 0.17343171484526415,
+      "cohens_d": 2.346222901764,
+      "sa_std": 2.5166114784235836,
+      "ma_std": 2.3094010767585034,
       "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 5415,
-        "output_tokens": 14341,
-        "total_tokens": 19756,
+        "input_tokens": 2441,
+        "output_tokens": 9788,
+        "total_tokens": 12229,
         "call_count": 6,
-        "cost_usd": 0.0377
+        "cost_usd": 0.025
       },
-      "timestamp": "2026-03-16T08:08:01.620048"
+      "timestamp": "2026-03-23T08:08:15.662085"
     },
     {
       "iteration": 2,
-      "sa_score": 60.0,
-      "ma_score": 63.0,
-      "delta": 3.0,
-      "p_value": 0.18849732879931091,
-      "cohens_d": 0.056308869142036214,
-      "sa_std": 51.96152422706632,
-      "ma_std": 54.56189146281496,
+      "sa_score": 92.0,
+      "ma_score": 93.0,
+      "delta": 1.0,
+      "p_value": 0.8581048690478794,
+      "cohens_d": 0.20203050891044214,
+      "sa_std": 3.4641016151377544,
+      "ma_std": 6.082762530298219,
       "failure_mode": "Unknown",
       "protocol_fix": "Unknown",
       "token_summary": {
-        "input_tokens": 5760,
-        "output_tokens": 13855,
-        "total_tokens": 19615,
+        "input_tokens": 7295,
+        "output_tokens": 15235,
+        "total_tokens": 22530,
         "call_count": 6,
-        "cost_usd": 0.0367
+        "cost_usd": 0.0409
       },
-      "timestamp": "2026-03-16T08:09:00.130189"
+      "timestamp": "2026-03-23T08:08:59.980961"
     },
     {
       "iteration": 3,
-      "sa_score": 86.33333333333333,
-      "ma_score": 95.0,
-      "delta": 8.666666666666671,
-      "p_value": 0.005865153227565683,
-      "cohens_d": 10.614455552060443,
-      "sa_std": 1.1547005383792517,
-      "ma_std": 0.0,
+      "sa_score": 85.0,
+      "ma_score": 92.0,
+      "delta": 7.0,
+      "p_value": 0.26076498900079886,
+      "cohens_d": 1.4142135623730951,
+      "sa_std": 1.0,
+      "ma_std": 6.928203230275509,
       "failure_mode": "converged",
       "protocol_fix": "",
       "token_summary": {
-        "input_tokens": 5080,
-        "output_tokens": 14175,
-        "total_tokens": 19255,
+        "input_tokens": 2644,
+        "output_tokens": 12352,
+        "total_tokens": 14996,
         "call_count": 6,
-        "cost_usd": 0.0371
+        "cost_usd": 0.0312
       },
-      "timestamp": "2026-03-16T08:09:45.164131"
+      "timestamp": "2026-03-23T08:09:37.137595"
     }
   ]
 }
